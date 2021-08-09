@@ -2,28 +2,32 @@
 title: "Procesamiento Plataformas"
 author: "Lucas Peralta - Milena Tripodi"
 date: "7/8/2021"
-output:
-  html_document:
-    code_folding: show
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, include = FALSE)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-```{r 01.Selección del último mes con datos completos}
+```{r Selección del último mes con datos completos, include = FALSE}
 
 mes <- "2021-07-01"
 
 ```
 
 
-```{r 02. Carga de liberías y bases}
+La base de datos de plataformas se explora para obtener las ponderaciones de gasto de cada rubro en cuotas y total con vistas a redistribuir cierto gasto no discriminado en la base total. Para obtener estas ponderaciones se debe realizar un procesamiento y análisis de la base, este documento se deriva del script desarrollado para tal fin. 
+
+
+
+```{r, include = FALSE}
+
 library(tidyverse)
 library(readxl)
 library(echarts4r)
 library(clock)
+library(writexl)
 
 rubrosa12 <- read_csv2("01.Bases/01.Raw/base_corregida_nueva.csv") %>% distinct(rubroa12)
 
@@ -32,6 +36,231 @@ plataformas <- read_csv("01.Bases/01.Raw/nuevo/A12_plataformas_mensual_20210711.
 plataformas <- plataformas %>% filter(periodo < as.Date(!!mes))
 
 filas_con_missing <- plataformas %>% filter(!complete.cases(.))
+
+
+# 03. Información sobre la base --------------------------------------------------
+
+print(paste("Cantidad de filas con algun missing value:", nrow(filas_con_missing)))
+unique(plataformas$rubroa12)
+unique(plataformas$plataforma)
+unique(plataformas$provincia)
+
+## Se transforma "Máquinas y Herramientas" en "Materiales para la construcción" ----
+plataformas <- plataformas %>% mutate(rubroa12 = if_else(rubroa12 == "Máquinas y Herramientas", "Materiales para la construcción", rubroa12))
+
+
+## Operaciones y monto por provincia, por plataforma y periodo ----
+resumen1 <- plataformas %>%
+  arrange(periodo) %>% 
+  group_by(periodo, plataforma, provincia) %>% 
+  summarise(operaciones = sum(operaciones),
+                  monto = sum(monto)) %>% 
+  arrange(operaciones, monto) %>% 
+  ungroup()
+
+
+split(resumen1, resumen1$provincia)
+
 ```
 
-.
+
+# Análisis exploratorio
+
+Dentro de la base de datos se encuentran datos de las siguientes plataformas: `r unique(plataformas$plataforma)`.  
+Los rubros presentes en la base son: `r unique(plataformas$rubroa12)`.  
+Los perídos abarcan: `r unique(plataformas$periodo)`
+
+## Monto de gasto por provincia
+```{r, echo=FALSE}
+### Gráfico serie temporal de monto por provincia ----
+resumen1 %>% arrange(periodo) %>% 
+  group_by(provincia) %>% 
+  e_charts(x = periodo) %>% 
+  e_line(monto) %>%
+  e_tooltip(trigger = "axis", axisPointer = list(type = "cross"))
+
+
+```
+
+## Operaciones por provincia
+```{r, echo=FALSE}
+### Gráfico serie temporal de operaciones por provincia ----
+resumen1 %>% arrange(periodo) %>% 
+  group_by(provincia) %>% 
+  e_charts(x = periodo) %>% 
+  e_line(operaciones) %>%
+  e_tooltip(trigger = "axis", axisPointer = list(type = "cross"))
+
+
+```
+
+
+
+```{r, include = FALSE}
+## Operaciones y monto por rubro y periodo ----
+resumen2 <- plataformas %>%
+  group_by(periodo, rubroa12) %>% 
+  summarise(operaciones = sum(operaciones),
+            monto       = sum(monto)) %>% 
+  arrange(operaciones, monto) %>% 
+  ungroup()
+```
+
+
+
+## Monto de gasto por rubro
+```{r, echo=FALSE}
+### Gráfico serie temporal de monto por rubro ----
+resumen2 %>% arrange(periodo) %>% 
+  group_by(rubroa12) %>% 
+  e_charts(x = periodo) %>% 
+  e_line(monto) %>%
+  e_tooltip(trigger = "axis", axisPointer = list(type = "cross"))
+
+
+```
+
+## Operaciones por rubro
+```{r, echo=FALSE}
+### Gráfico serie temporal de operaciones por rubro ----
+resumen2 %>% arrange(periodo) %>% 
+  group_by(rubroa12) %>% 
+  e_charts(x = periodo) %>% 
+  e_line(operaciones) %>%
+  e_tooltip(trigger = "axis", axisPointer = list(type = "cross"))
+```
+
+
+
+```{r, include = FALSE}
+## Cuotas ----
+
+resumen3 <- plataformas %>%
+  arrange(periodo) %>% 
+  group_by(periodo, plataforma, cuotas) %>% 
+  summarise(operaciones = sum(operaciones),
+            monto       = sum(monto)) %>% 
+  arrange(operaciones, monto) %>% 
+  ungroup()
+```
+
+## Monto de gasto por cuotas
+```{r, echo=FALSE}
+### Gráfico serie temporal monto por cuotas ----
+resumen3 %>% arrange(periodo) %>% 
+  group_by(cuotas) %>% 
+  e_charts(x = periodo) %>% 
+  e_line(monto) %>%
+  e_tooltip(trigger = "axis", axisPointer = list(type = "cross"))
+```
+
+## Operaciones por cuotas
+```{r, echo=FALSE}
+### Gráfico serie temporal operaciones por cuotas ----
+resumen3 %>% arrange(periodo) %>% 
+  group_by(cuotas) %>% 
+  e_charts(x = periodo) %>% 
+  e_line(operaciones) %>%
+  e_tooltip(trigger = "axis", axisPointer = list(type = "cross"))
+```
+
+
+
+# Cálculo de ponderaciones de gasto de Plataformas
+
+Para obtener las ponderaciones se hace un cálculo de las ponderaciones usando los últimos 6 meses. Hacia atrás se utiliza esta ponderación obtenida, pero hacia delante se va actualizando mes a mes, tomando siempre los últimos 6 meses.
+
+```{r, include = FALSE}
+
+# 04. Cálculo de participaciones de las cuotas por rubros -----------------
+
+## Aquí se obtiene la estructura de gasto por cuotas de mercado libre (BASADO EN LOS ULTIMOS 6 MESES) ----
+
+asd <- plataformas %>% distinct(rubroa12) %>% mutate(re = "das") %>% full_join(rubrosa12 %>% mutate(asd = "FAsd"))
+
+resumen4 <- plataformas %>%
+  arrange(periodo) %>% 
+  group_by(periodo, plataforma, rubroa12, cuotas) %>% 
+  summarise(operaciones = sum(operaciones),
+            monto       = sum(monto)) %>% 
+  arrange(operaciones, monto) %>% 
+  ungroup()
+
+ultimos_6_meses <- resumen4 %>% filter(periodo > add_months(max(periodo), -6)) %>% arrange(periodo) # ultimos 6 meses
+
+resumen5 <- ultimos_6_meses %>% # monto y operaciones total
+  group_by(plataforma, rubroa12, cuotas) %>% 
+  summarise(operaciones = sum(operaciones),
+            monto       = sum(monto)) %>% 
+  arrange(operaciones, monto) %>% 
+  ungroup()
+
+resumen_5_participacion <- resumen5 %>% # participaciones por rubro y cuota
+  group_by(plataforma, rubroa12) %>% 
+  mutate(participacion_monto_por_cuota       = monto / sum(monto),
+         participacion_operaciones_por_cuota = operaciones / sum(operaciones)) %>% 
+  ungroup()
+
+resumen_5_participacion_total <- resumen5 %>% # participación de cada rubro en el total
+  group_by(plataforma, rubroa12) %>% 
+  summarise(monto = sum(monto),
+            operaciones = sum(operaciones)) %>%
+  ungroup() %>% 
+  group_by(plataforma) %>% 
+  mutate(participacion_monto_por_cuota       = monto / sum(monto),
+         participacion_operaciones_por_cuota = operaciones / sum(operaciones),
+         cuotas = "Total") %>% 
+  ungroup()
+
+resumen_5_participacion <- resumen_5_participacion %>% arrange(cuotas) %>% mutate(cuotas = as.factor(cuotas)) %>%  # junto dfs
+  bind_rows(resumen_5_participacion_total) %>% mutate(cuotas = as.factor(cuotas))
+```
+
+## Participación del monto por cuota y total
+```{r, echo=FALSE}
+### Gráfico participación monto por cuota y total ----
+resumen_5_participacion %>% 
+  group_by(rubroa12) %>% 
+  e_charts(x = cuotas) %>% 
+  e_bar(participacion_monto_por_cuota) %>%
+  e_tooltip(
+    formatter = e_tooltip_item_formatter("percent", digits = 1)
+  )
+```
+
+## Participación de las operaciones por cuota y total
+```{r, echo=FALSE}
+### Gráfico participación operaciones por cuota y total ----
+resumen_5_participacion %>% 
+  group_by(rubroa12) %>% 
+  e_charts(x = cuotas) %>% 
+  e_bar(participacion_operaciones_por_cuota) %>%
+  e_tooltip(
+    formatter = e_tooltip_item_formatter("percent", digits = 1)
+  )
+```
+
+## Monto de gasto por cuota y total
+```{r}
+### Gráfico monto por cuota y total ----
+resumen_5_participacion %>% 
+  group_by(rubroa12) %>% 
+  e_charts(x = cuotas) %>% 
+  e_bar(monto) %>%
+  e_tooltip(
+    formatter = e_tooltip_item_formatter()
+  )
+```
+
+## Operaciones por cuota y total
+```{r, echo=FALSE}
+### Gráfico operaciones por cuota y total ----
+resumen_5_participacion %>% 
+  group_by(rubroa12) %>% 
+  e_charts(x = cuotas) %>% 
+  e_bar(operaciones) %>%
+  e_tooltip(
+    formatter = e_tooltip_item_formatter()
+  )
+```
+
