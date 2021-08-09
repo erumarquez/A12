@@ -14,6 +14,7 @@ library(tidyverse)
 library(readxl)
 library(echarts4r)
 library(clock)
+library(writexl)
 
 rubrosa12 <- read_csv2("01.Bases/01.Raw/base_corregida_nueva.csv") %>% distinct(rubroa12)
 
@@ -32,7 +33,7 @@ unique(plataformas$plataforma)
 unique(plataformas$provincia)
 
 ## Se transforma "Máquinas y Herramientas" en "Materiales para la construcción" ----
-plataformas <- plataformas %>% mutate(rubroa12 = if_else(rubroa12=="Máquinas y Herramientas", "Materiales para la construcción", rubroa12))
+plataformas <- plataformas %>% mutate(rubroa12 = if_else(rubroa12 == "Máquinas y Herramientas", "Materiales para la construcción", rubroa12))
 
 
 ## Operaciones y monto por provincia, por plataforma y periodo ----
@@ -40,7 +41,7 @@ resumen1 <- plataformas %>%
   arrange(periodo) %>% 
   group_by(periodo, plataforma, provincia) %>% 
   summarise(operaciones = sum(operaciones),
-                          monto = sum(monto)) %>% 
+                  monto = sum(monto)) %>% 
   arrange(operaciones, monto) %>% 
   ungroup()
 
@@ -65,7 +66,7 @@ resumen1 %>% arrange(periodo) %>%
 resumen2 <- plataformas %>%
   group_by(periodo, rubroa12) %>% 
   summarise(operaciones = sum(operaciones),
-            monto = sum(monto)) %>% 
+            monto       = sum(monto)) %>% 
   arrange(operaciones, monto) %>% 
   ungroup()
 
@@ -89,7 +90,7 @@ resumen3 <- plataformas %>%
   arrange(periodo) %>% 
   group_by(periodo, plataforma, cuotas) %>% 
   summarise(operaciones = sum(operaciones),
-            monto = sum(monto)) %>% 
+            monto       = sum(monto)) %>% 
   arrange(operaciones, monto) %>% 
   ungroup()
 
@@ -116,42 +117,40 @@ resumen4 <- plataformas %>%
   arrange(periodo) %>% 
   group_by(periodo, plataforma, rubroa12, cuotas) %>% 
   summarise(operaciones = sum(operaciones),
-            monto = sum(monto)) %>% 
+            monto       = sum(monto)) %>% 
   arrange(operaciones, monto) %>% 
   ungroup()
 
-ultimos_6_meses <- resumen4 %>% filter(periodo > add_months(max(periodo), -6)) %>% arrange(periodo)
+ultimos_6_meses <- resumen4 %>% filter(periodo > add_months(max(periodo), -6)) %>% arrange(periodo) # ultimos 6 meses
 
-# sacar estructura de gastos de estos 6 meses. 
-
-resumen5 <- ultimos_6_meses %>% 
+resumen5 <- ultimos_6_meses %>% # monto y operaciones total
   group_by(plataforma, rubroa12, cuotas) %>% 
   summarise(operaciones = sum(operaciones),
-            monto = sum(monto)) %>% 
+            monto       = sum(monto)) %>% 
   arrange(operaciones, monto) %>% 
   ungroup()
 
-resumen_5_participacion <- resumen5 %>%
-  group_by(plataforma, cuotas) %>% 
-  mutate(participacion_monto_por_cuota = monto / sum(monto),
+resumen_5_participacion <- resumen5 %>% # participaciones por rubro y cuota
+  group_by(plataforma, rubroa12) %>% 
+  mutate(participacion_monto_por_cuota       = monto / sum(monto),
          participacion_operaciones_por_cuota = operaciones / sum(operaciones)) %>% 
   ungroup()
 
-resumen_5_participacion_total <- resumen5 %>%
+resumen_5_participacion_total <- resumen5 %>% # participación de cada rubro en el total
   group_by(plataforma, rubroa12) %>% 
   summarise(monto = sum(monto),
             operaciones = sum(operaciones)) %>%
   ungroup() %>% 
   group_by(plataforma) %>% 
-  mutate(participacion_monto_por_cuota = monto / sum(monto),
+  mutate(participacion_monto_por_cuota       = monto / sum(monto),
          participacion_operaciones_por_cuota = operaciones / sum(operaciones),
          cuotas = "Total") %>% 
   ungroup()
 
-resumen_5_participacion <- resumen_5_participacion %>% arrange(cuotas) %>% mutate(cuotas = as.factor(cuotas)) %>% 
+resumen_5_participacion <- resumen_5_participacion %>% arrange(cuotas) %>% mutate(cuotas = as.factor(cuotas)) %>%  # junto dfs
   bind_rows(resumen_5_participacion_total) %>% mutate(cuotas = as.factor(cuotas))
 
-### Gráfico participacion monto por cuota y total ----
+### Gráfico participación monto por cuota y total ----
 resumen_5_participacion %>% 
   group_by(rubroa12) %>% 
   e_charts(x = cuotas) %>% 
@@ -160,7 +159,7 @@ resumen_5_participacion %>%
     formatter = e_tooltip_item_formatter("percent", digits = 1)
   )
 
-### Gráfico participacion operaciones por cuota y total ----
+### Gráfico participación operaciones por cuota y total ----
 resumen_5_participacion %>% 
   group_by(rubroa12) %>% 
   e_charts(x = cuotas) %>% 
@@ -178,7 +177,7 @@ resumen_5_participacion %>%
     formatter = e_tooltip_item_formatter()
   )
 
-### grafico operaciones por cuota y total ----
+### Gráfico operaciones por cuota y total ----
 resumen_5_participacion %>% 
   group_by(rubroa12) %>% 
   e_charts(x = cuotas) %>% 
@@ -189,8 +188,40 @@ resumen_5_participacion %>%
 
 ## Guardado base ----
 
-pond_export <- resumen_5_participacion %>% mutate(ultimo_periodo_valido = paste(max(plataformas$periodo)))
+pond_export <- resumen_5_participacion %>% mutate(ultimo_periodo_valido = paste(max(plataformas$periodo))) 
 
-# tener cuidado de no pisar el mes pasado
-# saveRDS(pond_export, "01.Bases/02.Clean/pond_plataformas.rds")
+pond_guardados <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") # Leo base histórica
+pond_guardados_aux <- pond_guardados %>% filter(ultimo_periodo_valido != unique(pond_export$ultimo_periodo_valido)) # saco el mes que voy a cargar actualmente
+pond_export <- bind_rows(pond_guardados_aux, pond_export) # agrego el mes actual
+
+saveRDS(pond_export, "01.Bases/02.Clean/pond_plataformas.rds") # guardo base
+
+
+## Armo tablas para exportar a xlsx ----------------------------------------
+
+
+
+participacion_monto_por_cuota_wide <- pond_export %>% # participación monto por cuota
+  select(ultimo_periodo_valido, rubroa12, cuotas, participacion_monto_por_cuota) %>% 
+  pivot_wider(names_from = cuotas, values_from = participacion_monto_por_cuota)
+
+participacion_operaciones_por_cuota_wide <- pond_export %>% # participación operaciones por cuota
+  select(ultimo_periodo_valido, rubroa12, cuotas, participacion_operaciones_por_cuota) %>% 
+  pivot_wider(names_from = cuotas, values_from = participacion_operaciones_por_cuota)
+
+monto_wide <- pond_export %>% # monto por cuota
+  select(ultimo_periodo_valido, rubroa12, cuotas, monto) %>% 
+  pivot_wider(names_from = cuotas, values_from = monto)
+
+operaciones_wide <- pond_export %>% # operaciones por cuota
+  select(ultimo_periodo_valido, rubroa12, cuotas, operaciones) %>% 
+  pivot_wider(names_from = cuotas, values_from = operaciones)
+
+export_xlsx <- list("todo_long" = pond_export,
+                    "participacion_monto" = participacion_monto_por_cuota_wide,
+                    "participacion_operaciones" = participacion_operaciones_por_cuota_wide,
+                    "monto" = monto_wide,
+                    "operaciones" = operaciones_wide)
+
+writexl::write_xlsx(export_xlsx, "03.Output/ponderaciones_plataformas.xlsx")
 
