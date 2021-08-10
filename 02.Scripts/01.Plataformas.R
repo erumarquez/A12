@@ -4,7 +4,7 @@ rm(list = ls())
 
 
 
-                                                    mes <- "2021-07-01"
+                                                    mes <- "2021-06-01"
 
 
 
@@ -16,11 +16,11 @@ library(echarts4r)
 library(clock)
 library(writexl)
 
-rubrosa12 <- read_csv2("01.Bases/01.Raw/base_corregida_nueva.csv") %>% distinct(rubroa12)
+rubrosa12 <- read_csv2("01.Bases/01.Raw/base_corregida_nueva.csv") %>% distinct(rubroa12) # ESTO CAMBIARLO POR UNA BASE MAS ESTABLE
 
 plataformas <- read_csv("01.Bases/01.Raw/nuevo/A12_plataformas_mensual_20210711.csv") %>% rename(año = anio) %>% mutate(periodo = date_build(año, mes))
 
-plataformas <- plataformas %>% filter(periodo < as.Date(!!mes))
+plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes))
 
 filas_con_missing <- plataformas %>% filter(!complete.cases(.))
 
@@ -188,10 +188,10 @@ resumen_5_participacion %>%
 
 ## Guardado base ----
 
-pond_export <- resumen_5_participacion %>% mutate(ultimo_periodo_valido = paste(max(plataformas$periodo))) 
+pond_export <- resumen_5_participacion %>% mutate(ultimo_periodo_valido = paste(max(plataformas$periodo)), periodo = max(plataformas$periodo))
 
 pond_guardados <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") # Leo base histórica
-pond_guardados_aux <- pond_guardados %>% filter(ultimo_periodo_valido != unique(pond_export$ultimo_periodo_valido)) # saco el mes que voy a cargar actualmente
+pond_guardados_aux <- pond_guardados %>% filter(periodo != unique(pond_export$periodo)) # saco el mes que voy a cargar actualmente
 pond_export <- bind_rows(pond_guardados_aux, pond_export) # agrego el mes actual
 
 saveRDS(pond_export, "01.Bases/02.Clean/pond_plataformas.rds") # guardo base
@@ -202,19 +202,19 @@ saveRDS(pond_export, "01.Bases/02.Clean/pond_plataformas.rds") # guardo base
 
 
 participacion_monto_por_cuota_wide <- pond_export %>% # participación monto por cuota
-  select(ultimo_periodo_valido, rubroa12, cuotas, participacion_monto_por_cuota) %>% 
+  select(periodo, rubroa12, cuotas, participacion_monto_por_cuota) %>% 
   pivot_wider(names_from = cuotas, values_from = participacion_monto_por_cuota)
 
 participacion_operaciones_por_cuota_wide <- pond_export %>% # participación operaciones por cuota
-  select(ultimo_periodo_valido, rubroa12, cuotas, participacion_operaciones_por_cuota) %>% 
+  select(periodo, rubroa12, cuotas, participacion_operaciones_por_cuota) %>% 
   pivot_wider(names_from = cuotas, values_from = participacion_operaciones_por_cuota)
 
 monto_wide <- pond_export %>% # monto por cuota
-  select(ultimo_periodo_valido, rubroa12, cuotas, monto) %>% 
+  select(periodo, rubroa12, cuotas, monto) %>% 
   pivot_wider(names_from = cuotas, values_from = monto)
 
 operaciones_wide <- pond_export %>% # operaciones por cuota
-  select(ultimo_periodo_valido, rubroa12, cuotas, operaciones) %>% 
+  select(periodo, rubroa12, cuotas, operaciones) %>% 
   pivot_wider(names_from = cuotas, values_from = operaciones)
 
 export_xlsx <- list("todo_long" = pond_export,
