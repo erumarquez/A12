@@ -26,8 +26,9 @@ first_data_y_otros <- base %>% filter(rubro_a_repartir %in% c("First Data E-Comm
 
 first_data_y_otros %>% distinct(provincia, rubro_a_repartir, marca_medio_pago) %>% arrange(rubro_a_repartir) # provincias, rubros, y marcas
 
-# Tomar estos gastos y repartirlos en las categorías de la base ponderaciones.
-# 
+### Reparto gastos ----
+
+# total
 
 totales <- first_data_y_otros %>% # gasto total por provincia y periodo
    group_by(periodo, provincia) %>% 
@@ -36,21 +37,51 @@ totales <- first_data_y_otros %>% # gasto total por provincia y periodo
    ungroup() %>% 
    arrange(periodo, provincia)
 
-asd <- totales %>% filter(provincia == "BUENOS AIRES", periodo == "2021-06-01") %>% left_join(ponderaciones %>% filter(cuotas == "Total"), by = "periodo")
+auxi_totales <- totales %>%
+  left_join(ponderaciones %>% filter(cuotas == "Total"), by = "periodo")
+
+auxi_totales %>%
+  group_by(periodo, provincia) %>%  # chequeo
+  summarise(sum   = sum(participacion_monto_por_cuota),
+            errew = sum(participacion_operaciones_por_cuota))
+
+auxi_totales <- auxi_totales %>% # monto total por rubro
+  mutate(monto_auxi        = monto * participacion_monto_por_cuota, 
+         operaciones_auxi  = operaciones * participacion_operaciones_por_cuota)
+
+auxi_totales <- auxi_totales %>%
+  mutate(operaciones_auxi = if_else(operaciones_auxi < 1, 1, round(operaciones_auxi)))
+
+auxi_totales %>% # chequeo
+  group_by(periodo, provincia) %>%
+  summarise(sum(monto_auxi),
+            sum(operaciones_auxi)) %>%
+  arrange(desc(periodo))
+
+auxi_totales <- auxi_totales %>% # df para el paso siguiente de repartir en cuotas y rubro
+  select(periodo, provincia, rubroa12, monto_auxi, operaciones_auxi)
+
+# cuotas
+
+auxi_cuotas <- ponderaciones %>%
+  filter(cuotas != "Total") %>%
+  inner_join(auxi_totales, by = c("periodo", "rubroa12"))
+
+auxi_cuotas %>% # chequeo
+  group_by(periodo, rubroa12, provincia) %>%
+  summarise(asd = sum(participacion_monto_por_cuota)) 
+
+auxi_cuotas <- auxi_cuotas %>% # calculo los montos y operaciones por cuotas y rubro
+          mutate(monto       = monto_auxi * participacion_monto_por_cuota,
+                 operaciones = round(operaciones_auxi * participacion_operaciones_por_cuota)) %>% 
+          mutate(operaciones = if_else(operaciones == 0, 1, operaciones))
+
+base_a_agregar <- auxi_cuotas %>% # base que tiene los gastos de E-commerce y Otros repartidos en rubros por periodo, cuota y provincia
+  select(-participacion_monto_por_cuota, -participacion_operaciones_por_cuota, -monto_auxi, -operaciones_auxi, -plataforma)
+
+# Esta base debe ser agregada a la base total que previamente se le saco lo de ecommerce y otros
+
+write_xlsx(list(base_a_agregar, first_data_y_otros), "asdsada.xlsx")
 
 
-asd %>% summarise(sum = sum(participacion_monto_por_cuota),
-                  asd = sum(participacion_operaciones_por_cuota))
-
-ww <- asd %>% mutate(monto_nuevo = monto * participacion_monto_por_cuota,
-                     operaciones_nuevo = operaciones * participacion_operaciones_por_cuota)
-
-
-ww %>% summarise(sum(monto_nuevo),
-                 sum(operaciones_nuevo))
-
-ww %>% 
-
-
-  first_data_y_otros
-
+# terminar de juntar las 2 bases y guardar
