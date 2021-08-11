@@ -44,8 +44,8 @@ totales <- first_data_y_otros %>% # gasto total por provincia y periodo
 auxi_totales <- totales %>%
   left_join(ponderaciones %>% filter(cuotas == "Total"), by = "periodo")
 
-auxi_totales %>%
-  group_by(periodo, provincia) %>%  # chequeo
+auxi_totales %>% # chequeo
+  group_by(periodo, provincia) %>%  
   summarise(sum   = sum(participacion_monto_por_cuota),
             errew = sum(participacion_operaciones_por_cuota))
 
