@@ -4,19 +4,23 @@ rm(list = ls())
 library(tidyverse)
 library(readxl)
 library(clock)
+library(writexl)
 
 
-base <- read_csv("01.Bases/01.Raw/A12_mensual_20210701/A12_mensual_20210701.csv") %>% rename("año" = anio) %>%
-  mutate(periodo = date_build(año, mes)) %>% rename(rubro_a_repartir = rubroa12)
+base_raw <- read_csv("01.Bases/01.Raw/A12_mensual_20210701/A12_mensual_20210701.csv") %>%
+  rename("año" = anio) %>%
+  mutate(periodo = date_build(año, mes)) %>% 
+  select(-año, -mes)
+  
+base <- base_raw  %>% rename(rubro_a_repartir = rubroa12)
 
 ponderaciones <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") %>% select(-operaciones, -monto, -ultimo_periodo_valido)
 
 # 02. Procesamiento -------------------------------------------------------
 
-
 unique(base$marca_medio_pago) # medios de pagos en la base
 unique(base$rubro_a_repartir) # rubros en la base
-if(nrow(distinct(ponderaciones, plataforma))!=1) print("HAY MAS DE UNA PLATAFORMA EN LA BASE")
+if(nrow(distinct(ponderaciones, plataforma)) != 1) print("HAY MAS DE UNA PLATAFORMA EN LA BASE")
 
 # hacer un par de medidas descriptivas de cuanto es First Data E-Commerce y Otro en el total de la base por meses
 
@@ -81,7 +85,14 @@ base_a_agregar <- auxi_cuotas %>% # base que tiene los gastos de E-commerce y Ot
 
 # Esta base debe ser agregada a la base total que previamente se le saco lo de ecommerce y otros
 
-write_xlsx(list(base_a_agregar, first_data_y_otros), "asdsada.xlsx")
+# 03.Bind de bases y exportación ---------------------------------------------
 
+base_final_1 <- base_a_agregar %>% mutate(marca_medio_pago = "repartido_ecommerce_otros") # base con los gastos "E-Commerce" y "otros" repartidos
 
-# terminar de juntar las 2 bases y guardar
+base_final_2 <- base_raw %>% filter(!rubroa12 %in% c("First Data E-Commerce", "Otros")) %>% mutate(cuotas = factor(cuotas)) # base raw sin "E-Commerce" y "otros"
+
+export <- bind_rows(base_final_1, base_final_2)
+
+saveRDS(export, "01.Bases/02.Clean/base_a12.rds")
+
+write_xlsx(base_final_1, "03.Output/gastos_repartidos.xlsx")
