@@ -8,7 +8,6 @@ library(clock)
 
 # base <- read_csv("01.Bases/01.Raw/A12_mensual_20210701/A12_mensual_20210701.csv") %>% rename("año" = anio)
 base <- read_csv2("01.Bases/01.Raw/base_corregida_nueva.csv") %>% rename("año" = anio)
-
 ipc <- read_excel("01.Bases/01.Raw/ipc.xlsx") %>% mutate(periodo = as.Date(periodo))
 
 # 02. Inicio procesamiento -------------------------------------------------
