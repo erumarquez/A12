@@ -92,7 +92,8 @@ cuadro_4 <- aux_base_1 %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
   mutate(var_mensual_monto_const = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
-         var_inter_monto_const   = monto_constante / lag(monto_constante, 12, order_by = periodo) - 1)
+         var_inter_monto_const   = monto_constante / lag(monto_constante, 12, order_by = periodo) - 1) %>% 
+  ungroup()
 
 cuadro_4 <- cuadro_4 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>% 
   mutate(part_monto_rubro_en_mes_año_ant = lag(part_monto_rubro_en_mes, 12, order_by = periodo)) %>% 
@@ -100,7 +101,7 @@ cuadro_4 <- cuadro_4 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>%
 
 # exportar cuadro_4 también para que lo vean analistas
 
-#write_xlsx(cuadro_4, "export.xlsx")
+write_xlsx(cuadro_4, "export.xlsx")
 
 ### Principales 7 rubros del último mes por operaciones ----
 
@@ -111,3 +112,62 @@ principales_7_rubros_operaciones <- base %>% filter(periodo == max(periodo)) %>%
   head(7)
 
 
+aux_base_2 <- base %>% 
+  mutate(agrupar = if_else(rubroa12 %in% (principales_7_rubros_operaciones$rubroa12), FALSE, TRUE),
+         rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
+
+cuadro_5 <- aux_base_2 %>%
+  group_by(periodo, rubro_auxiliar) %>% 
+  summarise(operaciones = sum(operaciones)) %>% 
+  ungroup() %>% 
+  group_by(periodo) %>% 
+  mutate(part_operaciones_rubro_en_mes = operaciones / sum(operaciones)) %>% 
+  ungroup() %>%
+  arrange(periodo) %>%
+  group_by(rubro_auxiliar) %>% 
+  mutate(var_mensual_operaciones = operaciones / lag(operaciones, 1, order_by = periodo) - 1,
+         var_inter_operaciones   = operaciones / lag(operaciones, 12, order_by = periodo) - 1)
+
+
+cuadro_5_resumen <- cuadro_5 %>% filter(periodo %in% c(max(periodo), add_months(max(cuadro_5$periodo), -12)))
+
+
+write_xlsx(cuadro_5, "export_2.xlsx")
+
+## Slide 9 ----
+
+### Participaciones por cuotas. Total base ----
+
+cuadro_6 <- base %>% group_by(periodo, cuotas) %>% 
+  summarise(monto = sum(monto)) %>% 
+  ungroup() %>% 
+  group_by(periodo) %>% 
+  mutate(participacion_monto_cuota_en_mes = monto / sum(monto)) %>% 
+  ungroup()
+
+cuadro_6_resumen <- cuadro_6 %>% filter(periodo %in% c(max(periodo), add_months(max(cuadro_6$periodo), -12), add_months(max(cuadro_6$periodo), -1))) %>% 
+  arrange(periodo) %>% 
+  group_by(cuotas) 
+
+
+write_xlsx(cuadro_6, "export_3.xlsx")
+
+### Participaciones por cuotas. Para cada uno de los 7 principales rubros ----
+
+aux_base_3 <- base %>% filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
+
+cuadro_7 <- aux_base_3 %>% group_by(periodo, rubroa12, cuotas) %>% 
+  summarise(monto = sum(monto)) %>% 
+  ungroup() %>% 
+  group_by(periodo, rubroa12) %>% 
+  mutate(participacion_monto_cuota_en_rubro_mes = monto / sum(monto)) %>% 
+  ungroup()
+
+cuadro_7_resumen <- cuadro_7 %>% filter(periodo == max(periodo))
+
+
+## Slide 10 ----
+
+cuadro_7_resumen
+
+# falta la parte de ticket promedio
