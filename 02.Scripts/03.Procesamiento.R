@@ -1,5 +1,5 @@
 rm(list = ls())
-# 01. Carga de liberías y bases -------------------------------------------
+# 01. Carga de librerías y bases -------------------------------------------
 
 library(tidyverse)
 library(readxl)

@@ -8,7 +8,7 @@ rm(list = ls())
 
 
 
-# 02. Carga de liberías y bases -------------------------------------------
+# 02. Carga de librerías y bases -------------------------------------------
 
 library(tidyverse)
 library(readxl)
