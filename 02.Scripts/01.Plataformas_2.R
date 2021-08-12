@@ -211,7 +211,7 @@ para_atras <- para_atras %>% group_by(plataforma, cuotas) %>%
 
 para_completar <- para_atras %>% mutate(aux = 1) %>% left_join( # formo el df de períodos histórico
 tibble(
-periodo = seq(lubridate::ymd('2016-01-01'), lubridate::ymd('2020-03-01'), by = '1 month'),
+periodo = seq(lubridate::ymd('2015-01-01'), lubridate::ymd('2020-03-01'), by = '1 month'),
 aux = 1
 )
 ) %>% select(-aux)
@@ -230,6 +230,6 @@ chequeo3 <- export %>% group_by(periodo, cuotas) %>%
 
 # 05. Exportación de base -------------------------------------------------
 
-saveRDS(export, "01.Bases/02.Clean/pond_plataformas_2.rds")
+saveRDS(export, "01.Bases/02.Clean/pond_plataformas.rds")
 
-
+# exportar algun xlsx con hojas con datos en wide de las ponderaciones y cosas asi

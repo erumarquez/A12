@@ -194,7 +194,7 @@ pond_guardados <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") # Leo base h
 pond_guardados_aux <- pond_guardados %>% filter(periodo != unique(pond_export$periodo)) # saco el mes que voy a cargar actualmente
 pond_export <- bind_rows(pond_guardados_aux, pond_export) # agrego el mes actual
 
-saveRDS(pond_export, "01.Bases/02.Clean/pond_plataformas.rds") # guardo base
+saveRDS(pond_export, "01.Bases/02.Clean/pond_plataformas_viejo_borrar.rds") # guardo base
 
 
 ## Armo tablas para exportar a xlsx ----------------------------------------
@@ -223,5 +223,5 @@ export_xlsx <- list("todo_long" = pond_export,
                     "monto" = monto_wide,
                     "operaciones" = operaciones_wide)
 
-writexl::write_xlsx(export_xlsx, "03.Output/ponderaciones_plataformas.xlsx")
+#writexl::write_xlsx(export_xlsx, "03.Output/ponderaciones_plataformas.xlsx")
 
