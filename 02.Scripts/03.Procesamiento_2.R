@@ -236,7 +236,7 @@ cuadro_9_2 <- base %>% left_join(poblacion %>% select(provincia, region)) %>%
 
 pob_tot <- poblacion %>% summarise(poblacion_pais = sum(poblacion)) %>% pull(1)
   
-cuadro_10 <- base %>% 
+cuadro_10_1 <- base %>% 
   group_by(periodo, provincia, rubroa12) %>% 
   summarise(monto = sum(monto)) %>% 
   ungroup() %>%
