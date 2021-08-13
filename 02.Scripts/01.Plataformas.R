@@ -42,7 +42,7 @@ resumen1 <- plataformas %>%
   arrange(periodo) %>% 
   group_by(periodo, plataforma, provincia) %>% 
   summarise(operaciones = sum(operaciones),
-            monto = sum(monto)) %>% 
+            monto       = sum(monto)) %>% 
   arrange(operaciones, monto) %>% 
   ungroup()
 
