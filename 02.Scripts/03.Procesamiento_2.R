@@ -81,10 +81,11 @@ principales_7_rubros_monto <- base %>% filter(periodo == max(periodo)) %>% group
 
 
 aux_base_1 <- base %>% 
-  mutate(agrupar = if_else(rubroa12 %in% (principales_7_rubros_monto$rubroa12), FALSE, TRUE),
+  mutate(agrupar        = if_else(rubroa12 %in% (principales_7_rubros_monto$rubroa12), FALSE, TRUE),
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
 
-cuadro_4 <- aux_base_1 %>%
+
+cuadro_4 <-aux_base_1 %>%
   group_by(periodo, rubro_auxiliar) %>% 
   summarise(monto_constante = sum(monto_constante),
             monto           = sum(monto)) %>% 
@@ -92,19 +93,19 @@ cuadro_4 <- aux_base_1 %>%
   group_by(periodo) %>% 
   mutate(part_monto_rubro_en_mes = monto / sum(monto)) %>% 
   ungroup() %>%
+  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
   mutate(var_mensual_monto_const = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
-         var_inter_monto_const   = monto_constante / lag(monto_constante, 12, order_by = periodo) - 1) %>% 
+         var_inter_monto_const   = monto_constante / lag(monto_constante, 2, order_by = periodo) - 1) %>% 
   ungroup()
 
 cuadro_4 <- cuadro_4 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>% 
-  mutate(part_monto_rubro_en_mes_año_ant = lag(part_monto_rubro_en_mes, 12, order_by = periodo)) %>% 
+  mutate(part_monto_rubro_en_mes_año_ant = lag(part_monto_rubro_en_mes, 2, order_by = periodo)) %>% 
   ungroup()
 
-# exportar cuadro_4 también para que lo vean analistas
+# exportar alguna base completa
 
-write_xlsx(cuadro_4, "export.xlsx")
 
 ### Principales 7 rubros del último mes por operaciones ----
 
@@ -119,6 +120,7 @@ aux_base_2 <- base %>%
   mutate(agrupar = if_else(rubroa12 %in% (principales_7_rubros_operaciones$rubroa12), FALSE, TRUE),
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
 
+
 cuadro_5 <- aux_base_2 %>%
   group_by(periodo, rubro_auxiliar) %>% 
   summarise(operaciones = sum(operaciones)) %>% 
@@ -126,16 +128,19 @@ cuadro_5 <- aux_base_2 %>%
   group_by(periodo) %>% 
   mutate(part_operaciones_rubro_en_mes = operaciones / sum(operaciones)) %>% 
   ungroup() %>%
+  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
   mutate(var_mensual_operaciones = operaciones / lag(operaciones, 1, order_by = periodo) - 1,
-         var_inter_operaciones   = operaciones / lag(operaciones, 12, order_by = periodo) - 1)
+         var_inter_operaciones   = operaciones / lag(operaciones, 2, order_by = periodo) - 1) %>% 
+  ungroup()
+
+cuadro_5 <- cuadro_5 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>% 
+  mutate(part_operaciones_rubro_en_mes_año_ant = lag(part_operaciones_rubro_en_mes, 2, order_by = periodo)) %>% 
+  ungroup()
 
 
-cuadro_5_resumen <- cuadro_5 %>% filter(periodo %in% c(max(periodo), add_months(max(cuadro_5$periodo), -12)))
-
-
-write_xlsx(cuadro_5, "export_2.xlsx")
+# exportar alguna base completa
 
 ## Slide 9 ----
 
