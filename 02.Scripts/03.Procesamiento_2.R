@@ -4,6 +4,7 @@ rm(list = ls())
 library(tidyverse)
 library(readxl)
 library(clock)
+library(writexl)
 
 
 base <- readRDS("01.Bases/02.Clean/base_final_a12.rds") %>%
@@ -17,6 +18,8 @@ unique(base$cuotas)
 unique(base$periodo)
 
 ipc <- read_excel("01.Bases/01.Raw/ipc.xlsx") %>% mutate(periodo = as.Date(periodo))
+
+poblacion <- readRDS("01.Bases/02.clean/poblacion.rds")
 
 
 # 02. Procesamiento -------------------------------------------------------
@@ -168,6 +171,81 @@ cuadro_7_resumen <- cuadro_7 %>% filter(periodo == max(periodo))
 
 ## Slide 10 ----
 
-cuadro_7_resumen
+aux_base_4 <- base %>% filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
 
-# falta la parte de ticket promedio
+cuadro_8_1 <- aux_base_4 %>%
+  group_by(periodo, rubroa12, cuotas) %>% 
+  summarise(monto       = sum(monto),
+            operaciones = sum(operaciones)) %>% 
+  ungroup() %>%
+  mutate(ticket_promedio = monto / operaciones) %>%
+  filter(periodo %in% c(max(periodo), add_months(max(aux_base_4$periodo), -1), add_months(max(aux_base_4$periodo), -12)))
+
+
+cuadro_8_2 <- cuadro_8_1 %>%
+  group_by(periodo, rubroa12) %>% 
+  summarise(monto       = sum(monto),
+            operaciones = sum(operaciones)) %>% 
+  ungroup() %>%
+  mutate(ticket_promedio = monto / operaciones) %>%
+  filter(periodo %in% c(max(periodo), add_months(max(aux_base_4$periodo), -1), add_months(max(aux_base_4$periodo), -12))) %>% 
+  mutate(cuotas = "Total")
+
+cuadro_8 <- bind_rows(cuadro_8_1 %>% mutate(cuotas = as.character(cuotas)), cuadro_8_2)
+
+cuadro_8 <- cuadro_8 %>% arrange(periodo) %>% 
+  group_by(rubroa12, cuotas) %>% 
+  mutate(var_mensual = ticket_promedio / lag(ticket_promedio, 1, order_by = periodo) - 1,
+         var_inter   = ticket_promedio / lag(ticket_promedio, 2, order_by = periodo) - 1) %>% 
+  ungroup()
+
+## Slide 11 ----
+
+cuadro_9_1 <- base %>% 
+  group_by(periodo, provincia) %>% 
+  summarise(monto = sum(monto)) %>% 
+  ungroup() %>% 
+  group_by(periodo) %>% 
+  mutate(participacion = monto / sum(monto)) %>% 
+  ungroup() %>%
+  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>% 
+  arrange(periodo) %>% 
+  group_by(provincia) %>% 
+  mutate(var_mensual = monto / lag(monto, 1, order_by = periodo) - 1,
+         var_inter   = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
+  ungroup()
+
+
+cuadro_9_2 <- base %>% left_join(poblacion %>% select(provincia, region)) %>% 
+  group_by(periodo, region) %>% 
+  summarise(monto = sum(monto)) %>% 
+  ungroup() %>% 
+  group_by(periodo) %>% 
+  mutate(participacion = monto / sum(monto)) %>% 
+  ungroup() %>%
+  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>% 
+  arrange(periodo) %>% 
+  group_by(region) %>% 
+  mutate(var_mensual = monto / lag(monto, 1, order_by = periodo) - 1,
+         var_inter   = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
+  ungroup()
+
+  
+  
+## Slide 12 ----
+
+pob_tot <- poblacion %>% summarise(poblacion_pais = sum(poblacion)) %>% pull(1)
+  
+cuadro_10 <- base %>% 
+  group_by(periodo, provincia, rubroa12) %>% 
+  summarise(monto = sum(monto)) %>% 
+  ungroup() %>%
+  filter(periodo == max(periodo)) %>% 
+  group_by(periodo, provincia) %>% 
+  mutate(participacion = monto / sum(monto)) %>% 
+  ungroup() %>% 
+  group_by(provincia) %>% 
+  filter(monto == max(monto)) %>% 
+  ungroup()
+
+
