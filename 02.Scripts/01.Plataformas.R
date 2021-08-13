@@ -50,14 +50,16 @@ resumen1 <- plataformas %>%
 split(resumen1, resumen1$provincia)
 
 ### Gráfico serie temporal de monto por provincia ----
-resumen1 %>% arrange(periodo) %>% 
+resumen1 %>%
+  arrange(periodo) %>% 
   group_by(provincia) %>% 
   e_charts(x = periodo) %>% 
   e_line(monto) %>%
   e_tooltip(trigger = "item", axisPointer = list(type = "cross"))
 
 ### Gráfico serie temporal de operaciones por provincia ----
-resumen1 %>% arrange(periodo) %>% 
+resumen1 %>%
+  arrange(periodo) %>% 
   group_by(provincia) %>% 
   e_charts(x = periodo) %>% 
   e_line(operaciones) %>%
@@ -72,14 +74,16 @@ resumen2 <- plataformas %>%
   ungroup()
 
 ### Gráfico serie temporal de monto por rubro ----
-resumen2 %>% arrange(periodo) %>% 
+resumen2 %>%
+  arrange(periodo) %>% 
   group_by(rubroa12) %>% 
   e_charts(x = periodo) %>% 
   e_line(monto) %>%
   e_tooltip(trigger = "item", axisPointer = list(type = "cross"))
 
 ### Gráfico serie temporal de operaciones por rubro ----
-resumen2 %>% arrange(periodo) %>% 
+resumen2 %>%
+  arrange(periodo) %>% 
   group_by(rubroa12) %>% 
   e_charts(x = periodo) %>% 
   e_line(operaciones) %>%
@@ -96,13 +100,15 @@ resumen3 <- plataformas %>%
   ungroup()
 
 ### Gráfico serie temporal monto por cuotas ----
-resumen3 %>% arrange(periodo) %>% 
+resumen3 %>%
+  arrange(periodo) %>% 
   group_by(cuotas) %>% 
   e_charts(x = periodo) %>% 
   e_line(monto)
 
 ### Gráfico serie temporal operaciones por cuotas ----
-resumen3 %>% arrange(periodo) %>% 
+resumen3 %>%
+  arrange(periodo) %>% 
   group_by(cuotas) %>% 
   e_charts(x = periodo) %>% 
   e_line(operaciones)
@@ -122,7 +128,8 @@ resumen4 <- plataformas %>%
   arrange(operaciones, monto) %>% 
   ungroup()
 
-resumen4 <- resumen4 %>% group_by(periodo, plataforma, cuotas) %>% 
+resumen4 <- resumen4 %>%
+  group_by(periodo, plataforma, cuotas) %>% 
   mutate(part_operaciones_en_cuota = operaciones / sum(operaciones),
          part_monto_en_cuota       = monto / sum(monto)) %>% 
   ungroup()
@@ -133,28 +140,32 @@ chequeo2 <- resumen4 %>% group_by(periodo, cuotas) %>% summarise(sum(part_operac
 
 # Gráficos de operaciones por cuotas
 
-resumen4 %>% filter(cuotas == 3) %>% # participaciones de los rubros en la cuota 3
+resumen4 %>%
+  filter(cuotas == 3) %>% # participaciones de los rubros en la cuota 3
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
   e_line(part_operaciones_en_cuota) %>%
   e_tooltip()
 
-resumen4 %>% filter(cuotas == 6) %>% # participaciones de los rubros en la cuota 6
+resumen4 %>%
+  filter(cuotas == 6) %>% # participaciones de los rubros en la cuota 6
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
   e_line(part_operaciones_en_cuota) %>%
   e_tooltip()
 
-resumen4 %>% filter(cuotas == 12) %>% # participaciones de los rubros en la cuota 12
+resumen4 %>%
+  filter(cuotas == 12) %>% # participaciones de los rubros en la cuota 12
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
   e_line(part_operaciones_en_cuota) %>%
   e_tooltip()
 
-resumen4 %>% filter(cuotas == 18) %>% # participaciones de los rubros en la cuota 18
+resumen4 %>%
+  filter(cuotas == 18) %>% # participaciones de los rubros en la cuota 18
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
@@ -164,28 +175,32 @@ resumen4 %>% filter(cuotas == 18) %>% # participaciones de los rubros en la cuot
 
 # Gráficos de monto por cuotas
 
-resumen4 %>% filter(cuotas == 3) %>% # participaciones de los rubros en la cuota 3
+resumen4 %>%
+  filter(cuotas == 3) %>% # participaciones de los rubros en la cuota 3
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
   e_line(part_monto_en_cuota) %>%
   e_tooltip()
 
-resumen4 %>% filter(cuotas == 6) %>% # participaciones de los rubros en la cuota 6
+resumen4 %>%
+  filter(cuotas == 6) %>% # participaciones de los rubros en la cuota 6
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
   e_line(part_monto_en_cuota) %>%
   e_tooltip()
 
-resumen4 %>% filter(cuotas == 12) %>% # participaciones de los rubros en la cuota 12
+resumen4 %>%
+  filter(cuotas == 12) %>% # participaciones de los rubros en la cuota 12
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
   e_line(part_monto_en_cuota) %>%
   e_tooltip()
 
-resumen4 %>% filter(cuotas == 18) %>% # participaciones de los rubros en la cuota 18
+resumen4 %>%
+  filter(cuotas == 18) %>% # participaciones de los rubros en la cuota 18
   group_by(rubroa12) %>%
   arrange(periodo) %>% 
   e_charts(x = periodo) %>% 
@@ -204,7 +219,8 @@ para_atras <- para_atras %>%
             monto       = sum(monto)) %>% 
   ungroup()
 
-para_atras <- para_atras %>% group_by(plataforma, cuotas) %>% 
+para_atras <- para_atras %>%
+  group_by(plataforma, cuotas) %>% 
   mutate(part_operaciones_en_cuota = operaciones / sum(operaciones),
          part_monto_en_cuota       = monto / sum(monto)) %>% 
   ungroup()
@@ -223,7 +239,8 @@ if (any(sort(unique(final_2$periodo)) %in% sort(unique(final_1$periodo)))) print
 
 export <- bind_rows(final_1, final_2)
 
-chequeo3 <- export %>% group_by(periodo, cuotas) %>% 
+chequeo3 <- export %>%
+  group_by(periodo, cuotas) %>% 
   summarise(sum(part_operaciones_en_cuota), sum(part_monto_en_cuota)) %>% 
   ungroup()
 
