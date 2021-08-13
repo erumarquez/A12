@@ -50,21 +50,24 @@ base <- base %>%
 ## Slides 4, 5 y 6 ----
 
 #### Monto corriente ----
-cuadro_1 <- base %>% group_by(periodo) %>% # monto corriente
+cuadro_1 <- base %>%
+  group_by(periodo) %>% # monto corriente
   summarise(monto_corriente = sum(monto)) %>% 
   ungroup() %>% 
   arrange(periodo) %>% 
   mutate(var_mensual = (monto_corriente / lag(monto_corriente, 1, order_by = periodo) - 1 ))
 
 #### Monto constante ----
-cuadro_2 <- base %>% group_by(periodo) %>% 
+cuadro_2 <- base %>%
+  group_by(periodo) %>% 
   summarise(monto_constante = sum(monto_constante)) %>% 
   ungroup() %>% 
   arrange(periodo) %>% 
   mutate(var_mensual = (monto_constante / lag(monto_constante, 1, order_by = periodo) - 1 ))
 
 #### Operaciones ----
-cuadro_3 <- base %>% group_by(periodo) %>% 
+cuadro_3 <- base %>%
+  group_by(periodo) %>% 
   summarise(operaciones = sum(operaciones)) %>% 
   ungroup() %>% 
   arrange(periodo) %>% 
@@ -109,7 +112,9 @@ cuadro_4 <- cuadro_4 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>%
 
 ### Principales 7 rubros del último mes por operaciones ----
 
-principales_7_rubros_operaciones <- base %>% filter(periodo == max(periodo)) %>% group_by(periodo, rubroa12) %>% 
+principales_7_rubros_operaciones <- base %>%
+  filter(periodo == max(periodo)) %>%
+  group_by(periodo, rubroa12) %>% 
   summarise(operaciones = sum(operaciones)) %>% 
   ungroup() %>% 
   arrange(desc(operaciones)) %>% 
@@ -146,7 +151,8 @@ cuadro_5 <- cuadro_5 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>%
 
 ### Participaciones por cuotas. Total base ----
 
-cuadro_6 <- base %>% group_by(periodo, cuotas) %>% 
+cuadro_6 <- base %>%
+  group_by(periodo, cuotas) %>% 
   summarise(monto = sum(monto)) %>% 
   ungroup() %>% 
   group_by(periodo) %>% 
@@ -162,9 +168,11 @@ write_xlsx(cuadro_6, "export_3.xlsx")
 
 ### Participaciones por cuotas. Para cada uno de los 7 principales rubros ----
 
-aux_base_3 <- base %>% filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
+aux_base_3 <- base %>%
+  filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
 
-cuadro_7 <- aux_base_3 %>% group_by(periodo, rubroa12, cuotas) %>% 
+cuadro_7 <- aux_base_3 %>%
+  group_by(periodo, rubroa12, cuotas) %>% 
   summarise(monto = sum(monto)) %>% 
   ungroup() %>% 
   group_by(periodo, rubroa12) %>% 
@@ -176,7 +184,8 @@ cuadro_7_resumen <- cuadro_7 %>% filter(periodo == max(periodo))
 
 ## Slide 10 ----
 
-aux_base_4 <- base %>% filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
+aux_base_4 <- base %>%
+  filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
 
 cuadro_8_1 <- aux_base_4 %>%
   group_by(periodo, rubroa12, cuotas) %>% 
@@ -198,7 +207,8 @@ cuadro_8_2 <- cuadro_8_1 %>%
 
 cuadro_8 <- bind_rows(cuadro_8_1 %>% mutate(cuotas = as.character(cuotas)), cuadro_8_2)
 
-cuadro_8 <- cuadro_8 %>% arrange(periodo) %>% 
+cuadro_8 <- cuadro_8 %>%
+  arrange(periodo) %>% 
   group_by(rubroa12, cuotas) %>% 
   mutate(var_mensual = ticket_promedio / lag(ticket_promedio, 1, order_by = periodo) - 1,
          var_inter   = ticket_promedio / lag(ticket_promedio, 2, order_by = periodo) - 1) %>% 
@@ -221,7 +231,8 @@ cuadro_9_1 <- base %>%
   ungroup()
 
 
-cuadro_9_2 <- base %>% left_join(poblacion %>% select(provincia, region)) %>% 
+cuadro_9_2 <- base %>%
+  left_join(poblacion %>% select(provincia, region)) %>% 
   group_by(periodo, region) %>% 
   summarise(monto = sum(monto)) %>% 
   ungroup() %>% 
@@ -239,7 +250,8 @@ cuadro_9_2 <- base %>% left_join(poblacion %>% select(provincia, region)) %>%
   
 ## Slide 12 ----
 
-pob_tot <- poblacion %>% summarise(poblacion_pais = sum(poblacion)) %>% pull(1)
+pob_tot <- poblacion %>%
+  summarise(poblacion_pais = sum(poblacion)) %>% pull(1)
   
 cuadro_10_1 <- base %>% 
   group_by(periodo, provincia, rubroa12) %>% 

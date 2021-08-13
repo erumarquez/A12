@@ -41,7 +41,6 @@ first_data_y_otros <- first_data_y_otros %>%
 
 # comienzo a repartir
 
-
 first_data_y_otros <- first_data_y_otros %>% left_join(ponderaciones, by = c("periodo", "cuotas")) # adiciono ponderaciones
 
 first_data_y_otros <- first_data_y_otros %>%
