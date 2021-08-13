@@ -7,92 +7,92 @@ library(clock)
 library(writexl)
 
 
-base_raw <- read_csv("01.Bases/01.Raw/A12_mensual_20210701/A12_mensual_20210701.csv") %>%
+base <- read_csv("01.Bases/01.Raw/A12_mensual_20210701/A12_mensual_20210701.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
-  select(-año, -mes)
-  
-base <- base_raw  %>% rename(rubro_a_repartir = rubroa12)
+  select(-año, -mes) %>%
+  filter(complete.cases(.),
+         cuotas %in% c(3, 6, 12, 18),
+         monto > 0)
 
-ponderaciones <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") %>% select(-operaciones, -monto, -ultimo_periodo_valido)
+ponderaciones <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") %>% select(-operaciones, -monto)
 
-# 02. Procesamiento -------------------------------------------------------
+# 02. Procesamiento First Data E-Commerce y Otros -------------------------------------------------------
 
 unique(base$marca_medio_pago) # medios de pagos en la base
-unique(base$rubro_a_repartir) # rubros en la base
+unique(base$rubroa12) # rubros en la base
 if(nrow(distinct(ponderaciones, plataforma)) != 1) print("HAY MAS DE UNA PLATAFORMA EN LA BASE")
 
 # hacer un par de medidas descriptivas de cuanto es First Data E-Commerce y Otro en el total de la base por meses
 
-## First Data E-Commerce y Otros ----
+first_data_y_otros <- base %>% filter(rubroa12 %in% c("First Data E-Commerce", "Otros")) # me quedo solo con estos 2 rubros para repartir
 
-first_data_y_otros <- base %>% filter(rubro_a_repartir %in% c("First Data E-Commerce", "Otros")) # me quedo solo con estos 2 rubros para repartir
+first_data_y_otros %>% distinct(provincia, rubroa12, marca_medio_pago) %>% arrange(rubroa12) # provincias, rubros, y marcas
 
-first_data_y_otros %>% distinct(provincia, rubro_a_repartir, marca_medio_pago) %>% arrange(rubro_a_repartir) # provincias, rubros, y marcas
+# calculo los gastos y operaciones por provincia, por periodo y por cuota
 
-### Reparto gastos ----
+first_data_y_otros <- first_data_y_otros %>% 
+  group_by(periodo, provincia, cuotas) %>% 
+  summarise(monto       = sum(monto),
+            operaciones = sum(operaciones)) %>% 
+  ungroup() %>% 
+  arrange(periodo, provincia, cuotas) 
 
-# total
 
-totales <- first_data_y_otros %>% # gasto total por provincia y periodo
-   group_by(periodo, provincia) %>% 
-   summarise(monto       = sum(monto),
-             operaciones = sum(operaciones)) %>% 
-   ungroup() %>% 
-   arrange(periodo, provincia)
+# comienzo a repartir
 
-auxi_totales <- totales %>%
-  left_join(ponderaciones %>% filter(cuotas == "Total"), by = "periodo")
 
-auxi_totales %>% # chequeo
-  group_by(periodo, provincia) %>%  
-  summarise(sum   = sum(participacion_monto_por_cuota),
-            errew = sum(participacion_operaciones_por_cuota))
+first_data_y_otros <- first_data_y_otros %>% left_join(ponderaciones, by = c("periodo", "cuotas")) # adiciono ponderaciones
 
-auxi_totales <- auxi_totales %>% # monto total por rubro
-  mutate(monto_auxi        = monto * participacion_monto_por_cuota, 
-         operaciones_auxi  = operaciones * participacion_operaciones_por_cuota)
+first_data_y_otros <- first_data_y_otros %>%
+  rename(operaciones_a_repartir = operaciones,
+         monto_a_repartir       = monto)
 
-auxi_totales <- auxi_totales %>%
-  mutate(operaciones_auxi = if_else(operaciones_auxi < 1, 1, round(operaciones_auxi)))
+chequeo1 <- first_data_y_otros %>% group_by(periodo, provincia, cuotas) %>% summarise(sum(part_monto_en_cuota), sum(part_operaciones_en_cuota))
 
-auxi_totales %>% # chequeo
-  group_by(periodo, provincia) %>%
-  summarise(sum(monto_auxi),
-            sum(operaciones_auxi)) %>%
-  arrange(desc(periodo))
+gastos_repartidos <- first_data_y_otros %>%
+  mutate(monto       = monto_a_repartir * part_monto_en_cuota,
+         operaciones = round(operaciones_a_repartir * part_operaciones_en_cuota)) %>% 
+  mutate(operaciones = if_else(operaciones == 0, 1, operaciones)) %>% 
+  group_by(periodo, cuotas, provincia) %>% 
+  mutate(chequeo_monto          = sum(monto),
+         chequeo_operaciones    = sum(operaciones)) %>% 
+  ungroup()
 
-auxi_totales <- auxi_totales %>% # df para el paso siguiente de repartir en cuotas y rubro
-  select(periodo, provincia, rubroa12, monto_auxi, operaciones_auxi)
 
-# cuotas
+write_xlsx(gastos_repartidos, "03.Output/01.Chequeos/gastos_repartidos.xlsx") # exporto un xlsx con lo repartido
 
-auxi_cuotas <- ponderaciones %>%
-  filter(cuotas != "Total") %>%
-  inner_join(auxi_totales, by = c("periodo", "rubroa12"))
 
-auxi_cuotas %>% # chequeo
-  group_by(periodo, rubroa12, provincia) %>%
-  summarise(asd = sum(participacion_monto_por_cuota)) 
+# 03. Bind de dfs y exportación --------------------------------------------
 
-auxi_cuotas <- auxi_cuotas %>% # calculo los montos y operaciones por cuotas y rubro
-          mutate(monto       = monto_auxi * participacion_monto_por_cuota,
-                 operaciones = round(operaciones_auxi * participacion_operaciones_por_cuota)) %>% 
-          mutate(operaciones = if_else(operaciones == 0, 1, operaciones))
+df_1 <- base %>% filter(!rubroa12 %in% c("First Data E-Commerce", "Otros")) # la base entera original sin los rubros de "e-commerce" y "otros"
 
-base_a_agregar <- auxi_cuotas %>% # base que tiene los gastos de E-commerce y Otros repartidos en rubros por periodo, cuota y provincia
-  select(-participacion_monto_por_cuota, -participacion_operaciones_por_cuota, -monto_auxi, -operaciones_auxi, -plataforma)
+gastos_repartidos <- gastos_repartidos %>% mutate(marca_medio_pago = "concepto_repartido") # agrego variable que esta presente en la base original
 
-# Esta base debe ser agregada a la base total que previamente se le saco lo de ecommerce y otros
+df_2 <- gastos_repartidos %>% select(colnames(df_1))
 
-# 03.Bind de bases y exportación ---------------------------------------------
+export <- bind_rows(df_1, df_2)
 
-base_final_1 <- base_a_agregar %>% mutate(marca_medio_pago = "repartido_ecommerce_otros") # base con los gastos "E-Commerce" y "otros" repartidos
+saveRDS(export, "01.Bases/02.Clean/base_final_a12.rds")
 
-base_final_2 <- base_raw %>% filter(!rubroa12 %in% c("First Data E-Commerce", "Otros")) %>% mutate(cuotas = factor(cuotas)) # base raw sin "E-Commerce" y "otros"
+# 04. Chequeo -------------------------------------------------------------
 
-export <- bind_rows(base_final_1, base_final_2)
 
-saveRDS(export, "01.Bases/02.Clean/base_a12.rds")
+chequeo2 <- export %>% group_by(periodo, provincia, cuotas) %>% 
+  summarise(suma_monto       = sum(monto),
+            suma_operaciones = sum(operaciones)) %>% 
+  ungroup() %>% 
+  full_join(
 
-write_xlsx(base_final_1, "03.Output/gastos_repartidos.xlsx")
+base %>% group_by(periodo, provincia, cuotas) %>% 
+  summarise(suma_monto       = sum(monto),
+            suma_operaciones = sum(operaciones)) %>% 
+  ungroup(),
+by = c("periodo", "provincia", "cuotas"), suffix = c("_clean", "_raw")
+  ) %>% 
+  mutate(chequeo_monto = suma_monto_clean == suma_monto_raw,
+         chequeo_operaciones = suma_operaciones_clean == suma_operaciones_raw,
+         diferencia_operacioens = suma_operaciones_clean - suma_operaciones_raw)
+
+
+
