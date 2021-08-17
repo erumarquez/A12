@@ -253,8 +253,21 @@ cuadro_9_2 <- base %>%
 
 pob_tot <- poblacion %>%
   summarise(poblacion_pais = sum(poblacion)) %>% pull(1)
-  
-cuadro_10_1 <- base %>% 
+
+cuadro_10_1 <- base %>%
+  group_by(periodo, provincia) %>% 
+  summarise(monto = sum(monto)) %>% 
+  ungroup() %>% 
+  left_join(poblacion, by = "provincia") %>% 
+  mutate(monto_per_capita = monto / poblacion)
+
+cuadro_10_2 <- cuadro_10_1 %>% group_by(periodo, region) %>% 
+  summarise(poblacion = sum(poblacion),
+            monto     = sum(monto)) %>% 
+  ungroup() %>% 
+  mutate(monto_per_capita = monto / poblacion)
+
+cuadro_10_3 <- base %>%
   group_by(periodo, provincia, rubroa12) %>% 
   summarise(monto = sum(monto)) %>% 
   ungroup() %>%
@@ -267,6 +280,7 @@ cuadro_10_1 <- base %>%
   ungroup()
 
 
+# completar slide 12
 
 # 03. Exportación ---------------------------------------------------------
 
@@ -281,8 +295,9 @@ cuadros_export <- list("Cuadro 1"   = cuadro_1,
                        "Cuadro 8"   = cuadro_8,
                        "Cuadro 9.1" = cuadro_9_1,
                        "Cuadro 9.2" = cuadro_9_2,
-                       "Cuadro 10"  = cuadro_10_1)
+                       "Cuadro 10.1"  = cuadro_10_1,
+                       "Cuadro 10.2"  = cuadro_10_2,
+                       "Cuadro 10.3"  = cuadro_10_3)
 
-cuadros_export %>% mutate(periodo = as.character(periodo))
 
 saveRDS(cuadros_export, "03.Output/02.Export/cuadros_export.rds")

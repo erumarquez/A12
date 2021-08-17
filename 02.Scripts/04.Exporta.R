@@ -77,7 +77,16 @@ range_write(resultados_a12_ggsheet, # escribo sheet slide_9_2
             reformat = FALSE)
 
 range_write(resultados_a12_ggsheet, # escribo sheet slide_10
-            sheet = "slide_12",
-            data = cuadros[["Cuadro 10"]],
+            sheet = "slide_12_1",
+            data = cuadros[["Cuadro 10.1"]],
             reformat = FALSE)
 
+range_write(resultados_a12_ggsheet, # escribo sheet slide_11
+            sheet = "slide_12_2",
+            data = cuadros[["Cuadro 10.2"]],
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_12
+            sheet = "slide_12_3",
+            data = cuadros[["Cuadro 10.3"]],
+            reformat = FALSE)
