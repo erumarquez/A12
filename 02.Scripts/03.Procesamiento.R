@@ -73,6 +73,8 @@ cuadro_3 <- base %>%
   arrange(periodo) %>% 
   mutate(var_mensual = (operaciones / lag(operaciones, 1, order_by = periodo) - 1 ))
 
+
+
 ## Slides 7 y 8 ----
 
 ### Principales 7 rubros del último mes por monto corriente ----
@@ -88,7 +90,7 @@ aux_base_1 <- base %>%
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
 
 
-cuadro_4 <-aux_base_1 %>%
+cuadro_4 <- aux_base_1 %>%
   group_by(periodo, rubro_auxiliar) %>% 
   summarise(monto_constante = sum(monto_constante),
             monto           = sum(monto)) %>% 
@@ -160,11 +162,10 @@ cuadro_6 <- base %>%
   ungroup()
 
 cuadro_6_resumen <- cuadro_6 %>% filter(periodo %in% c(max(periodo), add_months(max(cuadro_6$periodo), -12), add_months(max(cuadro_6$periodo), -1))) %>% 
-  arrange(periodo) %>% 
-  group_by(cuotas) 
+  arrange(periodo)
 
 
-write_xlsx(cuadro_6, "export_3.xlsx")
+#write_xlsx(cuadro_6, "export_3.xlsx")
 
 ### Participaciones por cuotas. Para cada uno de los 7 principales rubros ----
 
@@ -264,5 +265,27 @@ cuadro_10_1 <- base %>%
   group_by(provincia) %>% 
   filter(monto == max(monto)) %>% 
   ungroup()
+
+
+
+# 03. Exportación ---------------------------------------------------------
+
+
+cuadros_export <- list("Cuadro 1"   = cuadro_1,
+                       "Cuadro 2"   = cuadro_2,
+                       "Cuadro 3"   = cuadro_3,
+                       "Cuadro 4"   = cuadro_4,
+                       "Cuadro 5"   = cuadro_5,
+                       "Cuadro 6"   = cuadro_6_resumen,
+                       "Cuadro 7"   = cuadro_7_resumen,
+                       "Cuadro 8"   = cuadro_8,
+                       "Cuadro 9.1" = cuadro_9_1,
+                       "Cuadro 9.2" = cuadro_9_2,
+                       "Cuadro 10"  = cuadro_10_1)
+
+saveRDS(cuadros_export, "03.Output/02.Export/cuadros_export.rds")
+
+
+
 
 
