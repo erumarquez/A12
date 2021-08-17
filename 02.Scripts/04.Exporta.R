@@ -9,8 +9,8 @@ library(googlesheets4)
 
 cuadros <- readRDS("03.Output/02.Export/cuadros_export.rds")
 
-
-
+cuadros <- cuadros %>% # paso fecha a caracter porque sino me pone numeros raros en el googlesheet
+  map(~mutate(., periodo = as.character(periodo)))
 
 # 02.Subo resultados a googlesheet ---------------------------------------------
 
