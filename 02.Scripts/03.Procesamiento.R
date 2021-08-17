@@ -283,9 +283,6 @@ cuadros_export <- list("Cuadro 1"   = cuadro_1,
                        "Cuadro 9.2" = cuadro_9_2,
                        "Cuadro 10"  = cuadro_10_1)
 
+cuadros_export %>% mutate(periodo = as.character(periodo))
+
 saveRDS(cuadros_export, "03.Output/02.Export/cuadros_export.rds")
-
-
-
-
-
