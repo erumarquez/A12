@@ -39,18 +39,19 @@ Cada una de estas etapas cuentan con un script, estos se encuentran en la carpet
 
 ## Procesamiento de plataformas
 
-Se utiliza la última base disponible de "A12_plataformas_mensual" descargada del cloud de producción, esta base cuenta con datos de Mercado libre y muy pocos registros de Corre Compras (al momento de escribir esto 94 observaciones de Correo Compras y 3515 de Mercado libre). Se filtran los datos correspondientes a Mercado libre y las cuotas 3, 6 , 12 y 18. Se transforman los datos del rubro "Máquinas y Herramientas" en el rubro "Materiales para la construcción". Lo que se obtiene es la ponderación de gasto de cada rubro dentro de cada esquema de cuotas, por período. En base a estas ponderaciones de gasto se reparten, en la próxima etapa, los gastos correspondientes a "First Data E-Commerce" y "Otros" de la base total. La base de plataformas contiene datos desde Abril de 2020, lo que se hizo es completar las ponderaciones de los períodos anteriores a esa fecha con el promedio Abril 2020 - Septiembre 2020. A continuación se presenta el resultado obtenido para el período Junio de 2021:
+Se utiliza la última base disponible de "A12_plataformas_mensual" descargada del cloud de producción, esta base cuenta con datos de Mercado libre y muy pocos registros de Corre Compras (al momento de escribir esto 94 observaciones de Correo Compras y 3515 de Mercado libre). Se filtran los datos correspondientes a Mercado libre y las cuotas 3, 6 , 12 y 18. Se transforman los datos del rubro "Máquinas y Herramientas" en el rubro "Materiales para la construcción". Lo que se obtiene es la ponderación de gasto de cada rubro dentro de cada esquema de cuotas, por período. En base a estas ponderaciones de gasto se reparten, en la próxima etapa, los gastos correspondientes a "First Data E-Commerce" y "Otros" de la base total. La base de plataformas contiene datos desde Abril de 2020, lo que se hizo es completar las ponderaciones de los períodos anteriores a esa fecha con el promedio Abril 2020 - Septiembre 2020. A continuación se presenta el resultado obtenido para el período Julio de 2021:
   
 <br>
 
 ```{r plataformas}
 ponderacion_plataformas <- readRDS("01.Bases/02.Clean/pond_plataformas.rds")
-ponderacion_plataformas <- ponderacion_plataformas %>% filter(periodo == "2021-06-01")
+ponderacion_plataformas <- ponderacion_plataformas %>% filter(periodo == "2021-07-01")
 gt(ponderacion_plataformas %>% arrange(cuotas)) %>%
   fmt_percent(
     columns = c(7, 8),
     decimals = 1
-  )
+  ) %>%
+  tab_options(data_row.padding = px(1))
 ```
 
 
@@ -95,7 +96,8 @@ res <- full_join(res_raw, res_clean, by = c("periodo", "cuotas"), suffix = c("_r
   mutate(dif_monto       = monto_clean - monto_raw,
          dif_operaciones = operaciones_clean - operaciones_raw)
 
-gt(res %>% filter(periodo > "2021-03-01"))
+gt(res %>% filter(periodo > "2021-03-01")) %>%
+  tab_options(data_row.padding = px(1))
 
 
 ```
