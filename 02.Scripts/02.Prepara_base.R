@@ -1,5 +1,15 @@
 rm(list = ls())
-# 01. Carga de librerías y bases -------------------------------------------
+
+
+# 01. Seleccionar el último mes con datos completos -----------------------
+
+
+
+mes <- "2021-07-01"
+
+
+
+# 02. Carga de librerías y bases -------------------------------------------
 
 library(tidyverse)
 library(readxl)
@@ -7,17 +17,18 @@ library(clock)
 library(writexl)
 
 
-base <- read_csv("01.Bases/01.Raw/A12_mensual_20210701/A12_mensual_20210701.csv") %>%
+base <- read_csv("01.Bases/01.Raw/A12_mensual_20210805.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
   select(-año, -mes) %>%
-  filter(complete.cases(.),
+  filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
+         complete.cases(.),
          cuotas %in% c(3, 6, 12, 18),
          monto > 0)
 
 ponderaciones <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") %>% select(-operaciones, -monto)
 
-# 02. Procesamiento First Data E-Commerce y Otros -------------------------------------------------------
+# 03. Procesamiento First Data E-Commerce y Otros -------------------------------------------------------
 
 unique(base$marca_medio_pago) # medios de pagos en la base
 unique(base$rubroa12) # rubros en la base
@@ -62,7 +73,7 @@ gastos_repartidos <- first_data_y_otros %>%
 write_xlsx(gastos_repartidos, "03.Output/01.Chequeos/gastos_repartidos.xlsx") # exporto un xlsx con lo repartido
 
 
-# 03. Bind de dfs y exportación --------------------------------------------
+# 04. Bind de dfs y exportación --------------------------------------------
 
 df_1 <- base %>% filter(!rubroa12 %in% c("First Data E-Commerce", "Otros")) # la base entera original sin los rubros de "e-commerce" y "otros"
 
@@ -74,7 +85,7 @@ export <- bind_rows(df_1, df_2)
 
 saveRDS(export, "01.Bases/02.Clean/base_final_a12.rds")
 
-# 04. Chequeo -------------------------------------------------------------
+# 05. Chequeo -------------------------------------------------------------
 
 
 chequeo2 <- export %>% group_by(periodo, provincia, cuotas) %>% 

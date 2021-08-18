@@ -1,0 +1,100 @@
+---
+title: "Automatización Ahora 12"
+output:
+  html_document:
+    toc: no
+    df_print: paged
+  pdf_document:
+    dev: cairo_pdf
+    toc: no
+    latex_engine: xelatex
+header-includes:
+- \usepackage{fontspec}
+- \setmainfont{Calibri}
+classoption: a4paper
+lang: es
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+library(gt)
+library(tidyverse)
+library(clock)
+```
+
+En este documento se describen los pasos seguidos para la automatización del informe de Ahora 12. Estos se pueden resumir en 4 etapas:
+
+1.  Procesamiento de la base de plataformas para obtener ponderaciones de gasto.
+
+2.  Preparado de las bases para el procesamiento.
+
+3.  Procesamiento de las bases limpias para obtener los resultados necesarios.
+
+4.  Exportación de los resultados a Google Sheets.
+
+## Procesamiento de plataformas
+
+Se utiliza la última base disponible de "A12_plataformas_mensual" descargada del cloud de producción, esta base cuenta con datos de Mercado libre y muy pocos registros de Corre Compras (al momento de escribir esto 94 observaciones de Correo Compras y 3515 de Mercado libre). Se filtran los datos correspondientes a Mercado libre y las cuotas 3, 6 , 12 y 18. Se transforman los datos del rubro "Máquinas y Herramientas" en el rubro "Materiales para la construcción". Lo que se obtiene es la ponderación de gasto de cada rubro dentro de cada esquema de cuotas, por período. En base a estas ponderaciones de gasto se reparten, en la próxima etapa, los gastos correspondientes a "First Data E-Commerce" y "Otros" de la base total. La base de plataformas contiene datos desde Abril de 2020, lo que se hizo es completar las ponderaciones de los períodos anteriores a esa fecha con el promedio Abril 2020 - Septiembre 2020. A continuación se presenta el resultado obtenido para el período Junio de 2021:
+  
+<br>
+
+```{r plataformas}
+ponderacion_plataformas <- readRDS("01.Bases/02.Clean/pond_plataformas.rds")
+ponderacion_plataformas <- ponderacion_plataformas %>% filter(periodo == "2021-06-01")
+gt(ponderacion_plataformas %>% arrange(cuotas)) %>%
+  fmt_percent(
+    columns = c(7, 8),
+    decimals = 1
+  )
+```
+
+
+## Preparado de bases
+
+En este paso se lee la última base disponible de medios de pago "A12_mensual" descargada del cloud de producción y se utiliza la base generada en el paso anterior. El monto y las operaciones registradas por período y por cuotas de los rubros "First Data E-Commerce" y "Otros" se reparten en distintos rubros de acuerdo a lo que indique la base de ponderaciones de plataformas.
+
+
+```{r}
+# comparación entre resultados de gastos y operaciones base raw y clean
+
+base_raw <- read_csv("01.Bases/01.Raw/A12_mensual_20210805.csv") %>%
+  rename("año" = anio) %>%
+  mutate(periodo = date_build(año, mes)) %>% 
+  select(-año, -mes) %>%
+  filter(complete.cases(.),
+         cuotas %in% c(3, 6, 12, 18),
+         monto > 0)
+
+base_clean <- readRDS("01.Bases/02.Clean/base_final_a12.rds")
+
+
+res_raw <- base_raw %>% group_by(periodo, rubroa12, cuotas) %>% 
+  summarise(monto = sum(monto),
+            operaciones = sum(operaciones)) %>% 
+  ungroup() %>% 
+  arrange(desc(periodo))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -4,7 +4,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-06-01"
+mes <- "2021-07-01"
 
 
 
@@ -18,7 +18,11 @@ library(writexl)
 
 rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
 
-plataformas <- read_csv("01.Bases/01.Raw/nuevo/A12_plataformas_mensual_20210711.csv") %>% rename(año = anio) %>% mutate(periodo = date_build(año, mes))
+plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20210802.csv") %>% # lectura de base plataformas
+  rename(año = anio) %>%
+  mutate(periodo = date_build(año, mes))
+
+plataformas <- plataformas %>% filter(plataforma == "Mercado Libre")
 
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
                                       cuotas %in% c(3, 6, 12, 18)) # filtro cuotas 3, 6, 12 y 18
