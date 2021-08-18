@@ -34,7 +34,7 @@ En este documento se describen los pasos seguidos para la automatización del in
 
 4.  Exportación de los resultados a Google Sheets.
 
-Cada una de estas etapas cuentan con un script, estos se encuentran en la carpeta "02.Scripts" del proyecto. Las bases se encuentran dentro de la carpeta "01.Bases", en la subcarpeta "01.Raw" es donde se deben ir guardando las bases que se van bajando del cloud y es donde se debe actualizar el número del ipc nivel general cuando esta disponible. Una vez que se tienen estas bases actualizadas, solo se deben correr los scripts indicando cual es el último mes con datos completos. A continuación se detalla un poco más de cada etapa.  
+Cada una de estas etapas cuentan con un script, estos se encuentran en la carpeta "02.Scripts" del proyecto. Las bases se encuentran dentro de la carpeta "01.Bases", en la subcarpeta "01.Raw" es donde se deben ir guardando las bases que se van bajando del cloud y es donde se debe actualizar el número del ipc nivel general cuando esta disponible. Una vez que se tienen estas bases actualizadas, se deben correr los scripts indicando cual es el último mes con datos completos y cambiando la ruta hacia las nuevas bases. A continuación se detalla un poco más de cada etapa.  
 
 
 ## Procesamiento de plataformas

@@ -84,6 +84,7 @@ df_2 <- gastos_repartidos %>% select(colnames(df_1))
 export <- bind_rows(df_1, df_2)
 
 saveRDS(export, "01.Bases/02.Clean/base_final_a12.rds")
+write_xlsx(export, "03.Output/01.Chequeos/base_final_a12.xlsx")
 
 # 05. Chequeo -------------------------------------------------------------
 
