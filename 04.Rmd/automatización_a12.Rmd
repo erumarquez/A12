@@ -2,7 +2,8 @@
 title: "Automatización Ahora 12"
 output:
   html_document:
-    toc: no
+    toc: true
+    toc_float: true
     df_print: paged
   pdf_document:
     dev: cairo_pdf
@@ -29,9 +30,12 @@ En este documento se describen los pasos seguidos para la automatización del in
 
 2.  Preparado de las bases para el procesamiento.
 
-3.  Procesamiento de las bases limpias para obtener los resultados necesarios.
+3.  Procesamiento de las bases limpias para obtener los resultados requeridos.
 
 4.  Exportación de los resultados a Google Sheets.
+
+Cada una de estas etapas cuentan con un script, estos se encuentran en la carpeta "02.Scripts" del proyecto. Las bases se encuentran dentro de la carpeta "01.Bases", en la subcarpeta "01.Raw" es donde se deben ir guardando las bases que se van bajando del cloud y es donde se debe actualizar el número del ipc nivel general cuando esta disponible. Una vez que se tienen estas bases actualizadas, solo se deben correr los scripts indicando cual es el último mes con datos completos. A continuación se detalla un poco más de cada etapa.  
+
 
 ## Procesamiento de plataformas
 
@@ -52,7 +56,8 @@ gt(ponderacion_plataformas %>% arrange(cuotas)) %>%
 
 ## Preparado de bases
 
-En este paso se lee la última base disponible de medios de pago "A12_mensual" descargada del cloud de producción y se utiliza la base generada en el paso anterior. El monto y las operaciones registradas por período y por cuotas de los rubros "First Data E-Commerce" y "Otros" se reparten en distintos rubros de acuerdo a lo que indique la base de ponderaciones de plataformas. Esta reasignación de montos se realiza hacia dentro de cada cuota, entonces para chequear que esto es así se puede calcular sobre la base en bruto como se descarga desde el cloud y sobre la base limpia final transformada los gatos totales y operaciones por cuotas. Como se observa en la tabla los montos totales de gastos por período y monto se mantienen, y en operaciones hay pequeñas diferencias que responden a que la repartición de los conceptos se hace a nivel provincia, entonces a veces quedan operaciones con valor menor a 1 y lo que se hace es redondearlas a 1. Estas diferencias que corresponden a redondeo son insignificantes en relación al monto total de operaciones.
+En este paso se lee la última base disponible de medios de pago "A12_mensual" descargada del cloud de producción y se utiliza la base generada en el paso anterior. El monto y las operaciones registradas por período y por cuotas de los rubros "First Data E-Commerce" y "Otros" se reparten en distintos rubros de acuerdo a lo que indique la base de ponderaciones de plataformas. Esta reasignación de montos se realiza por provincia y hacia dentro de cada cuota. Para chequear que los montos totales por cuotas no se están modificando (solo su composición hacia adentro) se puede aplicar la misma operatoria estadística a la base en bruto y a la limpia.  
+Como se observa en la tabla los montos totales de gastos por período y monto se mantienen, y en operaciones hay pequeñas diferencias que responden a que la repartición de los conceptos se hace a nivel provincia, entonces a veces quedan rubros con operaciones con valor menor a 1 y lo que se hace es redondearlas a 1. Estas diferencias que corresponden a redondeo son insignificantes en relación al monto total de operaciones. Con esto se confirma que solo se está repartiendo el gasto de "First Data E-Commerce" y "Otros" hacia dentro de cada esquema de cuotas.
 
 
 ```{r, include=TRUE, echo=TRUE}
@@ -60,32 +65,34 @@ En este paso se lee la última base disponible de medios de pago "A12_mensual" d
 
 mes <- "2021-07-01" # ultimo mes completo
 
-base_raw <- read_csv("01.Bases/01.Raw/A12_mensual_20210805.csv") %>%
+base_raw <- read_csv("01.Bases/01.Raw/A12_mensual_20210805.csv") %>% # leo base en bruto
   rename("año" = anio) %>%
-  mutate(periodo = date_build(año, mes)) %>% 
+  mutate(periodo = date_build(año, mes)) %>% # creo la variable periodo
   select(-año, -mes) %>%
   filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
-         complete.cases(.),
-         cuotas %in% c(3, 6, 12, 18),
+         complete.cases(.), # saco filas con missings
+         cuotas %in% c(3, 6, 12, 18), # me quedo con las cuotas 3, 6, 12 y 18
          monto > 0)
 
-base_clean <- readRDS("01.Bases/02.Clean/base_final_a12.rds")
+base_clean <- readRDS("01.Bases/02.Clean/base_final_a12.rds") # leo base limpia
 
 
-res_raw <- base_raw %>% group_by(periodo, cuotas) %>% 
-  summarise(monto = sum(monto),
+res_raw <- base_raw %>% # calculo monto y operaciones total en base bruta
+  group_by(periodo, cuotas) %>% 
+  summarise(monto       = sum(monto),
             operaciones = sum(operaciones)) %>% 
   ungroup() %>% 
   arrange(desc(periodo))
 
-res_clean <- base_clean %>% group_by(periodo, cuotas) %>% 
-  summarise(monto = sum(monto),
+res_clean <- base_clean %>% # calculo monto y operaciones total en base transformada
+  group_by(periodo, cuotas) %>% 
+  summarise(monto       = sum(monto),
             operaciones = sum(operaciones)) %>% 
   ungroup() %>% 
   arrange(desc(periodo))
 
 res <- full_join(res_raw, res_clean, by = c("periodo", "cuotas"), suffix = c("_raw", "_clean")) %>% 
-  mutate(dif_monto = monto_clean - monto_raw,
+  mutate(dif_monto       = monto_clean - monto_raw,
          dif_operaciones = operaciones_clean - operaciones_raw)
 
 gt(res %>% filter(periodo > "2021-03-01"))
@@ -95,9 +102,13 @@ gt(res %>% filter(periodo > "2021-03-01"))
 
 
 
+## Procesamiento para obtención de resultados
 
+En esta etapa se trabaja con la base transformada en la etapa anterior, la serie de IPC nivel general de Indec y con datos de población. Antes de iniciar el procesamiento se colapsan 3 rubros ("Pequeños electrodomésticos", "Línea Blanca" y "Televisores") en 1 solo rubro que es "Electrodomésticos". Luego del procesamiento se obtienen todos los cuadros que sirven de insumo para realizar el informe.
 
+## Exportación de resultados
 
+La última etapa involucra la exportación de los cuadros a un archivo de Google Sheets, las hojas de este archivo se reescriben con los nuevos datos cada vez que se corre el script. Al escribir los datos, se respeta el formato que se haya establecido en la hoja, y todo lo que este escrito fuera del rango de la tabla exportada se mantiene también. Esto implica que si en columnas de los costados se arman fórmulas o gráficos referenciando el área donde se escriben los datos estos se mantienen. Cada hoja tiene el nombre de la slide a la que sirve para el informe.
 
 
 
