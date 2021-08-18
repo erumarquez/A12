@@ -15,13 +15,13 @@ cuadros <- cuadros %>% # paso fecha a caracter porque sino me pone numeros raros
 # 02.Subo resultados a googlesheet ---------------------------------------------
 
 ## Autorización googlesheets ----
-googledrive::drive_auth("mdointerno@gmail.com")
+googledrive::drive_auth("lucas.e.peralta.mail@gmail.com")
 gs4_auth(token = drive_token())
 
 
 ## Leo googlesheets ----
 
-resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1d6i9fDKI-zxU9hV6hKE80OtQHKkeHN50eDK7-5bQc1Y/edit#gid=0") %>%
+resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1kKT75fNVb8-5rFwrBumNIvTUlQAfDcnHJGMy7niY9f8/edit#gid=386411844") %>%
   as.character() # Leo la googlesheet resultados_a12
 
 gs4_browse(resultados_a12_ggsheet) # la abro en el explorador

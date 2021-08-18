@@ -161,7 +161,8 @@ cuadro_6 <- base %>%
   mutate(participacion_monto_cuota_en_mes = monto / sum(monto)) %>% 
   ungroup()
 
-cuadro_6_resumen <- cuadro_6 %>% filter(periodo %in% c(max(periodo), add_months(max(cuadro_6$periodo), -12), add_months(max(cuadro_6$periodo), -1))) %>% 
+cuadro_6_resumen <- cuadro_6 %>%
+  filter(periodo %in% c(max(periodo), add_months(max(cuadro_6$periodo), -12), add_months(max(cuadro_6$periodo), -1))) %>% 
   arrange(periodo)
 
 
