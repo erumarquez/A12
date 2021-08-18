@@ -52,28 +52,43 @@ gt(ponderacion_plataformas %>% arrange(cuotas)) %>%
 
 ## Preparado de bases
 
-En este paso se lee la última base disponible de medios de pago "A12_mensual" descargada del cloud de producción y se utiliza la base generada en el paso anterior. El monto y las operaciones registradas por período y por cuotas de los rubros "First Data E-Commerce" y "Otros" se reparten en distintos rubros de acuerdo a lo que indique la base de ponderaciones de plataformas.
+En este paso se lee la última base disponible de medios de pago "A12_mensual" descargada del cloud de producción y se utiliza la base generada en el paso anterior. El monto y las operaciones registradas por período y por cuotas de los rubros "First Data E-Commerce" y "Otros" se reparten en distintos rubros de acuerdo a lo que indique la base de ponderaciones de plataformas. Esta reasignación de montos se realiza hacia dentro de cada cuota, entonces para chequear que esto es así se puede calcular sobre la base en bruto como se descarga desde el cloud y sobre la base limpia final transformada los gatos totales y operaciones por cuotas. Como se observa en la tabla los montos totales de gastos por período y monto se mantienen, y en operaciones hay pequeñas diferencias que responden a que la repartición de los conceptos se hace a nivel provincia, entonces a veces quedan operaciones con valor menor a 1 y lo que se hace es redondearlas a 1. Estas diferencias que corresponden a redondeo son insignificantes en relación al monto total de operaciones.
 
 
-```{r}
+```{r, include=TRUE, echo=TRUE}
 # comparación entre resultados de gastos y operaciones base raw y clean
+
+mes <- "2021-07-01" # ultimo mes completo
 
 base_raw <- read_csv("01.Bases/01.Raw/A12_mensual_20210805.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
   select(-año, -mes) %>%
-  filter(complete.cases(.),
+  filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
+         complete.cases(.),
          cuotas %in% c(3, 6, 12, 18),
          monto > 0)
 
 base_clean <- readRDS("01.Bases/02.Clean/base_final_a12.rds")
 
 
-res_raw <- base_raw %>% group_by(periodo, rubroa12, cuotas) %>% 
+res_raw <- base_raw %>% group_by(periodo, cuotas) %>% 
   summarise(monto = sum(monto),
             operaciones = sum(operaciones)) %>% 
   ungroup() %>% 
   arrange(desc(periodo))
+
+res_clean <- base_clean %>% group_by(periodo, cuotas) %>% 
+  summarise(monto = sum(monto),
+            operaciones = sum(operaciones)) %>% 
+  ungroup() %>% 
+  arrange(desc(periodo))
+
+res <- full_join(res_raw, res_clean, by = c("periodo", "cuotas"), suffix = c("_raw", "_clean")) %>% 
+  mutate(dif_monto = monto_clean - monto_raw,
+         dif_operaciones = operaciones_clean - operaciones_raw)
+
+gt(res %>% filter(periodo > "2021-03-01"))
 
 
 ```
