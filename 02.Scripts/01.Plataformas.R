@@ -10,11 +10,9 @@ mes <- "2021-07-01"
 
 # 02. Carga de librerías y bases -------------------------------------------
 
-library(tidyverse)
-library(readxl)
-library(echarts4r)
-library(clock)
-library(writexl)
+install.packages("librarian")
+
+librarian::shelf(tidyverse, readxl, echarts4r, clock, writexl, googledrive, googlesheets4)
 
 rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
 

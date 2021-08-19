@@ -110,18 +110,14 @@ En esta etapa se trabaja con la base transformada en la etapa anterior, la serie
 
 ## Exportación de resultados
 
-La última etapa involucra la exportación de los cuadros a un archivo de Google Sheets, las hojas de este archivo se reescriben con los nuevos datos cada vez que se corre el script. Al escribir los datos, se respeta el formato que se haya establecido en la hoja, y todo lo que este escrito fuera del rango de la tabla exportada se mantiene también. Esto implica que si en columnas de los costados se arman fórmulas o gráficos referenciando el área donde se escriben los datos estos se mantienen. Cada hoja tiene el nombre de la slide a la que sirve para el informe.
+La última etapa involucra la exportación de los cuadros a un archivo de Google Sheets, las hojas de este archivo se reescriben con los nuevos datos cada vez que se corre el script. Al escribir los datos, se respeta el formato que se haya establecido en la hoja, y todo lo que este escrito fuera del rango de la tabla exportada se mantiene también. Esto implica que si en columnas de los costados se arman fórmulas o gráficos referenciando el área donde se escriben los datos estos se mantienen. Cada hoja tiene el nombre de la slide a la que sirve para el informe. En este script al inicio se debe establecer el correo electrónico de la persona que esta corriendolo (debe tener permiso para escribir en la googlesheet), cuando se corren estas lineas nos abre el explorador y se debe ingresar la contraseña por única vez.
 
 
-
-
-
-
-
-
-
-
-
+```{r, echo=TRUE,eval=FALSE}
+## Autorización googlesheets ----
+googledrive::drive_auth("lucas.e.peralta.mail@gmail.com")
+gs4_auth(token = drive_token())
+```
 
 
 
