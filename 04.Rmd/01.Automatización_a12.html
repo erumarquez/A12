@@ -253,17 +253,17 @@ div.tocify {
 <li><p>Procesamiento de las bases limpias para obtener los resultados requeridos.</p></li>
 <li><p>Exportación de los resultados a Google Sheets.</p></li>
 </ol>
-<p>Cada una de estas etapas cuentan con un script, estos se encuentran en la carpeta “02.Scripts” del proyecto. Las bases se encuentran dentro de la carpeta “01.Bases”, en la subcarpeta “01.Raw” es donde se deben ir guardando las bases que se van bajando del cloud y es donde se debe actualizar el número del ipc nivel general cuando esta disponible. Una vez que se tienen estas bases actualizadas, solo se deben correr los scripts indicando cual es el último mes con datos completos. A continuación se detalla un poco más de cada etapa.</p>
+<p>Cada una de estas etapas cuentan con un script, estos se encuentran en la carpeta “02.Scripts” del proyecto. Las bases se encuentran dentro de la carpeta “01.Bases”, en la subcarpeta “01.Raw” es donde se deben ir guardando las bases que se van bajando del cloud y es donde se debe actualizar el número del ipc nivel general cuando esta disponible. Una vez que se tienen estas bases actualizadas, se deben correr los scripts indicando cual es el último mes con datos completos y cambiando la ruta hacia las nuevas bases. Como resultado se escriben los cuadros que sirven de insumo para el informe en hojas de una GoogleSheet, cada una con el nombre de la slide del ppt a cual sirven. También en la carpeta “03.Output/01.Chequeos” se deja guardada la base limpia utilizada para los cálculos. A continuación se detalla un poco más de cada etapa.</p>
 <div id="procesamiento-de-plataformas" class="section level2">
 <h2>Procesamiento de plataformas</h2>
-<p>Se utiliza la última base disponible de “A12_plataformas_mensual” descargada del cloud de producción, esta base cuenta con datos de Mercado libre y muy pocos registros de Corre Compras (al momento de escribir esto 94 observaciones de Correo Compras y 3515 de Mercado libre). Se filtran los datos correspondientes a Mercado libre y las cuotas 3, 6 , 12 y 18. Se transforman los datos del rubro “Máquinas y Herramientas” en el rubro “Materiales para la construcción”. Lo que se obtiene es la ponderación de gasto de cada rubro dentro de cada esquema de cuotas, por período. En base a estas ponderaciones de gasto se reparten, en la próxima etapa, los gastos correspondientes a “First Data E-Commerce” y “Otros” de la base total. La base de plataformas contiene datos desde Abril de 2020, lo que se hizo es completar las ponderaciones de los períodos anteriores a esa fecha con el promedio Abril 2020 - Septiembre 2020. A continuación se presenta el resultado obtenido para el período Julio de 2021:</p>
+<p>Se utiliza la última base disponible de “A12_plataformas_mensual” descargada del cloud de producción, esta base cuenta con datos de Mercado libre y muy pocos registros de Corre Compras (al momento de escribir esto 94 observaciones de Correo Compras y 3515 de Mercado libre). Se filtran los datos correspondientes a Mercado libre y las cuotas 3, 6 , 12 y 18. Se transforman los datos del rubro “Máquinas y Herramientas” en el rubro “Materiales para la construcción”. Lo que se obtiene es la ponderación de gasto de cada rubro dentro de cada esquema de cuotas, por período. En base a estas ponderaciones de gasto se reparten, en la próxima etapa, los gastos correspondientes a “First Data E-Commerce” y “Otros” de la base total. La base de plataformas contiene datos desde Abril de 2020, lo que se hace es completar las ponderaciones de los períodos anteriores a esa fecha con el promedio Abril 2020 - Septiembre 2020. A continuación se presenta el resultado obtenido para el período Julio de 2021:</p>
 <p><br></p>
-<div id="iuorxbfpwx" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="sxyioflnhm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#iuorxbfpwx .gt_table {
+#sxyioflnhm .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -288,7 +288,7 @@ div.tocify {
   border-left-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_heading {
+#sxyioflnhm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -300,7 +300,7 @@ div.tocify {
   border-right-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_title {
+#sxyioflnhm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -310,7 +310,7 @@ div.tocify {
   border-bottom-width: 0;
 }
 
-#iuorxbfpwx .gt_subtitle {
+#sxyioflnhm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -320,13 +320,13 @@ div.tocify {
   border-top-width: 0;
 }
 
-#iuorxbfpwx .gt_bottom_border {
+#sxyioflnhm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_col_headings {
+#sxyioflnhm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -341,7 +341,7 @@ div.tocify {
   border-right-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_col_heading {
+#sxyioflnhm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -361,7 +361,7 @@ div.tocify {
   overflow-x: hidden;
 }
 
-#iuorxbfpwx .gt_column_spanner_outer {
+#sxyioflnhm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -373,15 +373,15 @@ div.tocify {
   padding-right: 4px;
 }
 
-#iuorxbfpwx .gt_column_spanner_outer:first-child {
+#sxyioflnhm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#iuorxbfpwx .gt_column_spanner_outer:last-child {
+#sxyioflnhm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#iuorxbfpwx .gt_column_spanner {
+#sxyioflnhm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -393,7 +393,7 @@ div.tocify {
   width: 100%;
 }
 
-#iuorxbfpwx .gt_group_heading {
+#sxyioflnhm .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -415,7 +415,7 @@ div.tocify {
   vertical-align: middle;
 }
 
-#iuorxbfpwx .gt_empty_group_heading {
+#sxyioflnhm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -430,15 +430,15 @@ div.tocify {
   vertical-align: middle;
 }
 
-#iuorxbfpwx .gt_from_md > :first-child {
+#sxyioflnhm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#iuorxbfpwx .gt_from_md > :last-child {
+#sxyioflnhm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#iuorxbfpwx .gt_row {
+#sxyioflnhm .gt_row {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -457,7 +457,7 @@ div.tocify {
   overflow-x: hidden;
 }
 
-#iuorxbfpwx .gt_stub {
+#sxyioflnhm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -469,7 +469,7 @@ div.tocify {
   padding-left: 12px;
 }
 
-#iuorxbfpwx .gt_summary_row {
+#sxyioflnhm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -479,7 +479,7 @@ div.tocify {
   padding-right: 5px;
 }
 
-#iuorxbfpwx .gt_first_summary_row {
+#sxyioflnhm .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -489,7 +489,7 @@ div.tocify {
   border-top-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_grand_summary_row {
+#sxyioflnhm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -499,7 +499,7 @@ div.tocify {
   padding-right: 5px;
 }
 
-#iuorxbfpwx .gt_first_grand_summary_row {
+#sxyioflnhm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -509,11 +509,11 @@ div.tocify {
   border-top-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_striped {
+#sxyioflnhm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#iuorxbfpwx .gt_table_body {
+#sxyioflnhm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -522,7 +522,7 @@ div.tocify {
   border-bottom-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_footnotes {
+#sxyioflnhm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -536,13 +536,13 @@ div.tocify {
   border-right-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_footnote {
+#sxyioflnhm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#iuorxbfpwx .gt_sourcenotes {
+#sxyioflnhm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -556,41 +556,41 @@ div.tocify {
   border-right-color: #D3D3D3;
 }
 
-#iuorxbfpwx .gt_sourcenote {
+#sxyioflnhm .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#iuorxbfpwx .gt_left {
+#sxyioflnhm .gt_left {
   text-align: left;
 }
 
-#iuorxbfpwx .gt_center {
+#sxyioflnhm .gt_center {
   text-align: center;
 }
 
-#iuorxbfpwx .gt_right {
+#sxyioflnhm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#iuorxbfpwx .gt_font_normal {
+#sxyioflnhm .gt_font_normal {
   font-weight: normal;
 }
 
-#iuorxbfpwx .gt_font_bold {
+#sxyioflnhm .gt_font_bold {
   font-weight: bold;
 }
 
-#iuorxbfpwx .gt_font_italic {
+#sxyioflnhm .gt_font_italic {
   font-style: italic;
 }
 
-#iuorxbfpwx .gt_super {
+#sxyioflnhm .gt_super {
   font-size: 65%;
 }
 
-#iuorxbfpwx .gt_footnote_marks {
+#sxyioflnhm .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -953,12 +953,12 @@ res &lt;- full_join(res_raw, res_clean, by = c(&quot;periodo&quot;, &quot;cuotas
 
 gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   tab_options(data_row.padding = px(1))</code></pre>
-<div id="czpasdhivd" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="xxyfizkwst" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#czpasdhivd .gt_table {
+#xxyfizkwst .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -983,7 +983,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-left-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_heading {
+#xxyfizkwst .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -995,7 +995,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_title {
+#xxyfizkwst .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1005,7 +1005,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-bottom-width: 0;
 }
 
-#czpasdhivd .gt_subtitle {
+#xxyfizkwst .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1015,13 +1015,13 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-top-width: 0;
 }
 
-#czpasdhivd .gt_bottom_border {
+#xxyfizkwst .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_col_headings {
+#xxyfizkwst .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1036,7 +1036,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_col_heading {
+#xxyfizkwst .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1056,7 +1056,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   overflow-x: hidden;
 }
 
-#czpasdhivd .gt_column_spanner_outer {
+#xxyfizkwst .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1068,15 +1068,15 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   padding-right: 4px;
 }
 
-#czpasdhivd .gt_column_spanner_outer:first-child {
+#xxyfizkwst .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#czpasdhivd .gt_column_spanner_outer:last-child {
+#xxyfizkwst .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#czpasdhivd .gt_column_spanner {
+#xxyfizkwst .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1088,7 +1088,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   width: 100%;
 }
 
-#czpasdhivd .gt_group_heading {
+#xxyfizkwst .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1110,7 +1110,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   vertical-align: middle;
 }
 
-#czpasdhivd .gt_empty_group_heading {
+#xxyfizkwst .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1125,15 +1125,15 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   vertical-align: middle;
 }
 
-#czpasdhivd .gt_from_md > :first-child {
+#xxyfizkwst .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#czpasdhivd .gt_from_md > :last-child {
+#xxyfizkwst .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#czpasdhivd .gt_row {
+#xxyfizkwst .gt_row {
   padding-top: 1px;
   padding-bottom: 1px;
   padding-left: 5px;
@@ -1152,7 +1152,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   overflow-x: hidden;
 }
 
-#czpasdhivd .gt_stub {
+#xxyfizkwst .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1164,7 +1164,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   padding-left: 12px;
 }
 
-#czpasdhivd .gt_summary_row {
+#xxyfizkwst .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1174,7 +1174,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   padding-right: 5px;
 }
 
-#czpasdhivd .gt_first_summary_row {
+#xxyfizkwst .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1184,7 +1184,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_grand_summary_row {
+#xxyfizkwst .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1194,7 +1194,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   padding-right: 5px;
 }
 
-#czpasdhivd .gt_first_grand_summary_row {
+#xxyfizkwst .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1204,11 +1204,11 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_striped {
+#xxyfizkwst .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#czpasdhivd .gt_table_body {
+#xxyfizkwst .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1217,7 +1217,7 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_footnotes {
+#xxyfizkwst .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1231,13 +1231,13 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_footnote {
+#xxyfizkwst .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#czpasdhivd .gt_sourcenotes {
+#xxyfizkwst .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1251,41 +1251,41 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#czpasdhivd .gt_sourcenote {
+#xxyfizkwst .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#czpasdhivd .gt_left {
+#xxyfizkwst .gt_left {
   text-align: left;
 }
 
-#czpasdhivd .gt_center {
+#xxyfizkwst .gt_center {
   text-align: center;
 }
 
-#czpasdhivd .gt_right {
+#xxyfizkwst .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#czpasdhivd .gt_font_normal {
+#xxyfizkwst .gt_font_normal {
   font-weight: normal;
 }
 
-#czpasdhivd .gt_font_bold {
+#xxyfizkwst .gt_font_bold {
   font-weight: bold;
 }
 
-#czpasdhivd .gt_font_italic {
+#xxyfizkwst .gt_font_italic {
   font-style: italic;
 }
 
-#czpasdhivd .gt_super {
+#xxyfizkwst .gt_super {
   font-size: 65%;
 }
 
-#czpasdhivd .gt_footnote_marks {
+#xxyfizkwst .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -1446,7 +1446,10 @@ gt(res %&gt;% filter(periodo &gt; &quot;2021-03-01&quot;)) %&gt;%
 </div>
 <div id="exportación-de-resultados" class="section level2">
 <h2>Exportación de resultados</h2>
-<p>La última etapa involucra la exportación de los cuadros a un archivo de Google Sheets, las hojas de este archivo se reescriben con los nuevos datos cada vez que se corre el script. Al escribir los datos, se respeta el formato que se haya establecido en la hoja, y todo lo que este escrito fuera del rango de la tabla exportada se mantiene también. Esto implica que si en columnas de los costados se arman fórmulas o gráficos referenciando el área donde se escriben los datos estos se mantienen. Cada hoja tiene el nombre de la slide a la que sirve para el informe.</p>
+<p>La última etapa involucra la exportación de los cuadros a un archivo de Google Sheets, las hojas de este archivo se reescriben con los nuevos datos cada vez que se corre el script. Al escribir los datos, se respeta el formato que se haya establecido en la hoja, y todo lo que este escrito fuera del rango de la tabla exportada se mantiene también. Esto implica que si en columnas de los costados se arman fórmulas o gráficos referenciando el área donde se escriben los datos estos se mantienen. Cada hoja tiene el nombre de la slide a la que sirve para el informe. En este script al inicio se debe establecer el correo electrónico de la persona que esta corriendolo (debe tener permiso para escribir en la googlesheet), cuando se corren estas lineas nos abre el explorador y se debe ingresar la contraseña por única vez.</p>
+<pre class="r"><code>## Autorización googlesheets ----
+googledrive::drive_auth(&quot;lucas.e.peralta.mail@gmail.com&quot;)
+gs4_auth(token = drive_token())</code></pre>
 </div>
 
 
