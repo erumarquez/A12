@@ -51,42 +51,47 @@ range_write(resultados_a12_ggsheet, # escribo sheet slide_8
             data = cuadros[["Cuadro 5"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_9
+range_write(resultados_a12_ggsheet, # escribo sheet slide_9_1
             sheet = "slide_9_1",
             data = cuadros[["Cuadro 6"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_9
+range_write(resultados_a12_ggsheet, # escribo sheet slide_9_2
             sheet = "slide_9_2",
             data = cuadros[["Cuadro 7"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_6
+range_write(resultados_a12_ggsheet, # escribo sheet slide_10
             sheet = "slide_10",
             data = cuadros[["Cuadro 8"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_9_1
+range_write(resultados_a12_ggsheet, # escribo sheet slide_10_aux
+            sheet = "slide_10_aux",
+            data = cuadros[["Cuadro 8.1"]],
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_11_1
             sheet = "slide_11_1",
             data = cuadros[["Cuadro 9.1"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_9_2
+range_write(resultados_a12_ggsheet, # escribo sheet slide_11_2
             sheet = "slide_11_2",
             data = cuadros[["Cuadro 9.2"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_10
+range_write(resultados_a12_ggsheet, # escribo sheet slide_12_1
             sheet = "slide_12_1",
             data = cuadros[["Cuadro 10.1"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_11
+range_write(resultados_a12_ggsheet, # escribo sheet slide_12_2
             sheet = "slide_12_2",
             data = cuadros[["Cuadro 10.2"]],
             reformat = FALSE)
 
-range_write(resultados_a12_ggsheet, # escribo sheet slide_12
+range_write(resultados_a12_ggsheet, # escribo sheet slide_12_3
             sheet = "slide_12_3",
             data = cuadros[["Cuadro 10.3"]],
             reformat = FALSE)

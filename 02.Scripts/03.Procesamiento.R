@@ -230,6 +230,12 @@ cuadro_8 <- cuadro_8 %>%
          var_inter   = ticket_promedio / lag(ticket_promedio, 2, order_by = periodo) - 1) %>% 
   ungroup()
 
+cuadro_8_1 <- base %>% 
+  group_by(periodo) %>% 
+  summarise(ticket_promedio = sum(monto) / sum(operaciones)) %>% 
+  ungroup()
+
+
 ## Slide 11 ----
 
 cuadro_9_1 <- base %>% 
@@ -310,6 +316,7 @@ cuadros_export <- list("Cuadro 1"     = cuadro_1,
                        "Cuadro 6"     = cuadro_6_resumen,
                        "Cuadro 7"     = cuadro_7_resumen,
                        "Cuadro 8"     = cuadro_8,
+                       "Cuadro 8.1"   = cuadro_8_1,
                        "Cuadro 9.1"   = cuadro_9_1,
                        "Cuadro 9.2"   = cuadro_9_2,
                        "Cuadro 10.1"  = cuadro_10_1,
