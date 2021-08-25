@@ -78,7 +78,9 @@ cuadro_3 <- base %>%
 ## Slides 7 y 8 ----
 
 ### Principales 7 rubros del último mes por monto corriente ----
-principales_7_rubros_monto <- base %>% filter(periodo == max(periodo)) %>% group_by(periodo, rubroa12) %>% 
+principales_7_rubros_monto <- base %>%
+  filter(periodo == max(periodo)) %>%
+  group_by(periodo, rubroa12) %>% 
   summarise(monto = sum(monto)) %>% 
   ungroup() %>% 
   arrange(desc(monto)) %>% 
@@ -105,9 +107,16 @@ cuadro_4 <- aux_base_1 %>%
          var_inter_monto_const   = monto_constante / lag(monto_constante, 2, order_by = periodo) - 1) %>% 
   ungroup()
 
-cuadro_4 <- cuadro_4 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>% 
+cuadro_4 <- cuadro_4 %>%
+  arrange(periodo) %>%
+  group_by(rubro_auxiliar) %>% 
   mutate(part_monto_rubro_en_mes_año_ant = lag(part_monto_rubro_en_mes, 2, order_by = periodo)) %>% 
   ungroup()
+
+cuadro_4 <- cuadro_4 %>%
+  mutate(auxi_ordena = if_else(rubro_auxiliar == "Otros", TRUE, FALSE)) %>% 
+  arrange(periodo, auxi_ordena, desc(monto)) %>% 
+  select(-auxi_ordena)
 
 # exportar alguna base completa
 
@@ -124,7 +133,7 @@ principales_7_rubros_operaciones <- base %>%
 
 
 aux_base_2 <- base %>% 
-  mutate(agrupar = if_else(rubroa12 %in% (principales_7_rubros_operaciones$rubroa12), FALSE, TRUE),
+  mutate(agrupar        = if_else(rubroa12 %in% (principales_7_rubros_operaciones$rubroa12), FALSE, TRUE),
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
 
 
@@ -145,6 +154,11 @@ cuadro_5 <- aux_base_2 %>%
 cuadro_5 <- cuadro_5 %>% arrange(periodo) %>% group_by(rubro_auxiliar) %>% 
   mutate(part_operaciones_rubro_en_mes_año_ant = lag(part_operaciones_rubro_en_mes, 2, order_by = periodo)) %>% 
   ungroup()
+
+cuadro_5 <- cuadro_5 %>%
+  mutate(auxi_ordena = if_else(rubro_auxiliar == "Otros", TRUE, FALSE)) %>% 
+  arrange(periodo, auxi_ordena, desc(operaciones)) %>% 
+  select(-auxi_ordena)
 
 
 # exportar alguna base completa
@@ -260,13 +274,15 @@ cuadro_10_1 <- base %>%
   summarise(monto = sum(monto)) %>% 
   ungroup() %>% 
   left_join(poblacion, by = "provincia") %>% 
-  mutate(monto_per_capita = monto / poblacion)
+  mutate(monto_per_capita = monto / poblacion) %>% 
+  filter(periodo >= "2020-01-01")
 
 cuadro_10_2 <- cuadro_10_1 %>% group_by(periodo, region) %>% 
   summarise(poblacion = sum(poblacion),
             monto     = sum(monto)) %>% 
   ungroup() %>% 
-  mutate(monto_per_capita = monto / poblacion)
+  mutate(monto_per_capita = monto / poblacion) %>% 
+  filter(periodo >= "2020-01-01")
 
 cuadro_10_3 <- base %>%
   group_by(periodo, provincia, rubroa12) %>% 
@@ -286,16 +302,16 @@ cuadro_10_3 <- base %>%
 # 03. Exportación ---------------------------------------------------------
 
 
-cuadros_export <- list("Cuadro 1"   = cuadro_1,
-                       "Cuadro 2"   = cuadro_2,
-                       "Cuadro 3"   = cuadro_3,
-                       "Cuadro 4"   = cuadro_4,
-                       "Cuadro 5"   = cuadro_5,
-                       "Cuadro 6"   = cuadro_6_resumen,
-                       "Cuadro 7"   = cuadro_7_resumen,
-                       "Cuadro 8"   = cuadro_8,
-                       "Cuadro 9.1" = cuadro_9_1,
-                       "Cuadro 9.2" = cuadro_9_2,
+cuadros_export <- list("Cuadro 1"     = cuadro_1,
+                       "Cuadro 2"     = cuadro_2,
+                       "Cuadro 3"     = cuadro_3,
+                       "Cuadro 4"     = cuadro_4,
+                       "Cuadro 5"     = cuadro_5,
+                       "Cuadro 6"     = cuadro_6_resumen,
+                       "Cuadro 7"     = cuadro_7_resumen,
+                       "Cuadro 8"     = cuadro_8,
+                       "Cuadro 9.1"   = cuadro_9_1,
+                       "Cuadro 9.2"   = cuadro_9_2,
                        "Cuadro 10.1"  = cuadro_10_1,
                        "Cuadro 10.2"  = cuadro_10_2,
                        "Cuadro 10.3"  = cuadro_10_3)

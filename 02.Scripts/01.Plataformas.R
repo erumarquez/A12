@@ -10,7 +10,7 @@ mes <- "2021-07-01"
 
 # 02. Carga de librerías y bases -------------------------------------------
 
-install.packages("librarian")
+#install.packages("librarian")
 
 librarian::shelf(tidyverse, readxl, echarts4r, clock, writexl, googledrive, googlesheets4)
 
@@ -20,7 +20,7 @@ plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20210802.csv") 
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
 
-plataformas <- plataformas %>% filter(plataforma == "Mercado Libre")
+plataformas <- plataformas %>% filter(plataforma == "Mercado Libre") # me quedo solo con mercado libre
 
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
                                       cuotas %in% c(3, 6, 12, 18)) # filtro cuotas 3, 6, 12 y 18
