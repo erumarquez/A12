@@ -104,7 +104,9 @@ cuadro_4 <- aux_base_1 %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
   mutate(var_mensual_monto_const = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
-         var_inter_monto_const   = monto_constante / lag(monto_constante, 2, order_by = periodo) - 1) %>% 
+         var_inter_monto_const   = monto_constante / lag(monto_constante, 2, order_by = periodo) - 1,
+         var_mensual_monto_corr  = monto / lag(monto, 1, order_by = periodo) - 1,
+         var_inter_monto_corr    = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
   ungroup()
 
 cuadro_4 <- cuadro_4 %>%
