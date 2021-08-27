@@ -1,6 +1,6 @@
 rm(list = ls())
 
-# 01. Seleccionar el mes desde el que se quiere acumular para los graficos  -----------------------
+# 01. Seleccionar el mes desde el que se quiere acumular para los gráficos  -----------------------
 
 
 
