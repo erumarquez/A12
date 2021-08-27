@@ -7,6 +7,7 @@ rm(list = ls())
 mes <- "2021-01-01"
 
 #hola
+# segundo comentariio
 
 # 02. Carga de librerías y bases -------------------------------------------
 
