@@ -18,71 +18,93 @@ library(googledrive)
 library(googlesheets4)
 
 base <- readRDS("01.Bases/02.Clean/base_final_a12.rds")
+comercios <- read_xlsx("01.Bases/01.Raw/A12_comercios.xlsx")
 
 # 03. Procesamiento -------------------------------------------------------
 
 ## 03.01 Participación monto ----
 
-cuadro_1 <- base %>%
-  group_by(periodo, provincia) %>% 
-  summarise(monto = sum(monto)) %>% 
-  ungroup() %>% 
-  group_by(periodo) %>% 
-  mutate(part_en_pais = monto / sum(monto)) %>% 
+cuadro_1 <- base  |> 
+  group_by(periodo, provincia) |> 
+  summarise(monto = sum(monto)) |> 
+  ungroup() |> 
+  group_by(periodo) |> 
+  mutate(part_en_pais = monto / sum(monto)) |> 
   ungroup()
 
-cuadro_1 <- cuadro_1 %>% 
+cuadro_1 <- cuadro_1 |> 
   filter(periodo >= "2020-01-01")
 
 ## 03.02 Participación operaciones ----
 
-cuadro_2 <- base %>%
-  group_by(periodo, provincia) %>% 
-  summarise(operaciones = sum(operaciones)) %>% 
-  ungroup() %>% 
-  group_by(periodo) %>% 
-  mutate(part_en_pais = operaciones / sum(operaciones)) %>% 
+cuadro_2 <- base |>
+  group_by(periodo, provincia) |> 
+  summarise(operaciones = sum(operaciones)) |> 
+  ungroup() |> 
+  group_by(periodo) |> 
+  mutate(part_en_pais = operaciones / sum(operaciones)) |> 
   ungroup()
 
-cuadro_2 <- cuadro_2 %>% 
+cuadro_2 <- cuadro_2 |> 
   filter(periodo >= "2020-01-01")
 
 ## 03.03 Ventas por rubro y cuotas ----
 
-principales_7_rubros_monto <- base %>% 
-  filter(periodo >= !!mes) %>% # cambiar esto en caso de que se quiera el acumulado de otro año
-  group_by(provincia, rubroa12) %>% 
-  summarise(monto = sum(monto)) %>% 
-  ungroup() %>% 
-  group_by(provincia) %>% 
-  arrange(desc(monto)) %>%
-  filter(row_number() <= 7) %>% 
-  ungroup() %>% 
-  arrange(provincia) %>%
-  select(-monto) %>% 
+principales_7_rubros_monto <- base |> 
+  filter(periodo >= !!mes) |> # cambiar esto en caso de que se quiera el acumulado de otro año
+  group_by(provincia, rubroa12) |> 
+  summarise(monto = sum(monto)) |> 
+  ungroup() |> 
+  group_by(provincia) |> 
+  arrange(desc(monto)) |>
+  filter(row_number() <= 7) |> 
+  ungroup() |> 
+  arrange(provincia) |>
+  select(-monto) |> 
   mutate(principal = TRUE)
 
-cuadro_3_pre <- base %>%
-  filter(periodo >= !!mes) %>% # cambiar esto en caso de que se quiera el acumulado de otro año
-  left_join(principales_7_rubros_monto, by = c("provincia", "rubroa12")) %>% 
+cuadro_3_pre <- base |>
+  filter(periodo >= !!mes) |> # cambiar esto en caso de que se quiera el acumulado de otro año
+  left_join(principales_7_rubros_monto, by = c("provincia", "rubroa12")) |> 
   mutate(rubro_auxi = if_else(is.na(principal), "Otros", rubroa12))
   
-cuadro_3_1 <- cuadro_3_pre %>% 
-  group_by(provincia, rubro_auxi) %>% 
-  summarise(monto = sum(monto)) %>% 
-  ungroup() %>%
-  group_by(provincia) %>% 
-  mutate(part = monto / sum(monto)) %>% 
+cuadro_3_1 <- cuadro_3_pre |> 
+  group_by(provincia, rubro_auxi) |> 
+  summarise(monto = sum(monto)) |> 
+  ungroup() |>
+  group_by(provincia) |> 
+  mutate(part = monto / sum(monto)) |> 
   ungroup()
 
-cuadro_3_2 <- cuadro_3_pre %>% 
-  filter(principal) %>% 
-  group_by(provincia, rubro_auxi, cuotas) %>%
-  summarise(monto = sum(monto)) %>%
-  ungroup() %>% 
-  group_by(provincia, rubro_auxi) %>% 
-  mutate(part = monto /  sum(monto)) %>% 
+cuadro_3_2 <- cuadro_3_pre |> 
+  filter(principal) |> 
+  group_by(provincia, rubro_auxi, cuotas) |>
+  summarise(monto = sum(monto)) |>
+  ungroup() |> 
+  group_by(provincia, rubro_auxi) |> 
+  mutate(part = monto /  sum(monto)) |> 
   ungroup()
+
+# 03.04 CUIT por provincia ----
+
+cuadro_4 <- comercios |> 
+  distinct(cuit, provincia) |> 
+  count(provincia, name = "cantidad de CUITs", sort = TRUE) |> 
+  mutate(participacion = `cantidad de CUITs` / sum(`cantidad de CUITs`))
+
+cuadro_5 <- comercios |> group_by(cuit) |>  filter( n() > 1 ) # la base tiene muchos duplicados en cuit por direcciones distintas
+cuadro_5 <- cuadro_5 |> head(1000)
+
+cuadro_6 <- comercios |> 
+  distinct(cuit, provincia, localidad) |> 
+  count(provincia, localidad, name = "cantidad de CUITs", sort = TRUE) |> 
+  arrange(provincia, localidad)
+
+cuadro_7 <- comercios |> 
+  distinct(cuit, provincia, localidad, direccion) |> 
+  arrange(provincia, localidad, cuit)
+cuadro_7 <- cuadro_7 |> head(1000)
+
 
 # 04. Exportación -------------------------------------------------------------
 
@@ -93,7 +115,7 @@ gs4_auth(token = drive_token())
 
 ## 04.02 Leo googlesheets ----
 
-resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1jh10T0S8-kwXnYVsXEDILyHTafOCZiA_i822LQVCUVk/edit#gid=0") %>%
+resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1jh10T0S8-kwXnYVsXEDILyHTafOCZiA_i822LQVCUVk/edit#gid=0") |>
   as.character() # Leo la googlesheet resultados_a12
 
 gs4_browse(resultados_a12_ggsheet) # la abro en el explorador
@@ -122,3 +144,22 @@ range_write(resultados_a12_ggsheet, # escribo sheet slide_5_2
             data = cuadro_3_2,
             reformat = FALSE)
 
+range_write(resultados_a12_ggsheet, # escribo sheet cant_cuits
+            sheet = "cant_cuits",
+            data = cuadro_4,
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet duplicados_base
+            sheet = "duplicados_base",
+            data = cuadro_5,
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet cant_cuits_local
+            sheet = "cant_cuits_local",
+            data = cuadro_6,
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet direcciones
+            sheet = "direcciones",
+            data = cuadro_7,
+            reformat = FALSE)
