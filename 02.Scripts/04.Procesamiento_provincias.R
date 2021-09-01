@@ -96,8 +96,9 @@ cuadro_3_2 <- cuadro_3_pre |>
 
 cuadro_4 <- cuits |> # cantidad de cuits por provincia
   distinct(periodo, provincia, cuit) |> 
-  count(periodo, provincia, name = "Cantidad de CUITs") |> 
-  filter(periodo >= "2020-01-01")
+  count(periodo, provincia, name = "cantidad de CUITs") |> 
+  filter(periodo >= "2020-01-01") |> 
+  arrange(periodo, desc(`cantidad de CUITs`), provincia)
 
 # se puede llegar a contar los principales cuits por operaciones y por monto por periodo y provincia
 
