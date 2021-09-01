@@ -18,7 +18,14 @@ library(googledrive)
 library(googlesheets4)
 
 base <- readRDS("01.Bases/02.Clean/base_final_a12.rds")
+
+cuits <- read_csv("01.Bases/01.Raw/A12_CUIT_provincia_rubro_20210805.csv") |>
+  rename("año" = anio) |>
+  mutate(periodo = date_build(año, mes)) |> 
+  select(-año, -mes)
+
 comercios <- read_xlsx("01.Bases/01.Raw/A12_comercios.xlsx")
+
 
 # 03. Procesamiento -------------------------------------------------------
 
@@ -85,25 +92,36 @@ cuadro_3_2 <- cuadro_3_pre |>
   mutate(part = monto /  sum(monto)) |> 
   ungroup()
 
-# 03.04 CUIT por provincia ----
+## 03.04 CUIT por provincia ----
 
-cuadro_4 <- comercios |> 
-  distinct(cuit, provincia) |> 
-  count(provincia, name = "cantidad de CUITs", sort = TRUE) |> 
+cuadro_4 <- cuits |> # cantidad de cuits por provincia
+  distinct(periodo, provincia, cuit) |> 
+  count(periodo, provincia, name = "Cantidad de CUITs") |> 
+  filter(periodo >= "2020-01-01")
+
+# se puede llegar a contar los principales cuits por operaciones y por monto por periodo y provincia
+
+
+## 03.05 Comercios por provincia ----
+
+cuadro_5_1 <- comercios |> 
+  count(cuit, name = "cantidad de CUITs", sort = TRUE) |> 
   mutate(participacion = `cantidad de CUITs` / sum(`cantidad de CUITs`))
 
-cuadro_5 <- comercios |> group_by(cuit) |>  filter( n() > 1 ) # la base tiene muchos duplicados en cuit por direcciones distintas
-cuadro_5 <- cuadro_5 |> head(1000)
+cuadro_5_2 <- comercios |>
+  group_by(cuit) |>
+  filter( n() > 1 ) # la base tiene muchos duplicados en cuit por direcciones distintas
+cuadro_5_2 <- cuadro_5_2 |> head(1000)
 
-cuadro_6 <- comercios |> 
+cuadro_5_3 <- comercios |> 
   distinct(cuit, provincia, localidad) |> 
   count(provincia, localidad, name = "cantidad de CUITs", sort = TRUE) |> 
   arrange(provincia, localidad)
 
-cuadro_7 <- comercios |> 
+cuadro_5_4 <- comercios |> 
   distinct(cuit, provincia, localidad, direccion) |> 
   arrange(provincia, localidad, cuit)
-cuadro_7 <- cuadro_7 |> head(1000)
+cuadro_5_4 <- cuadro_5_4 |> head(1000)
 
 
 # 04. Exportación -------------------------------------------------------------
@@ -151,15 +169,15 @@ range_write(resultados_a12_ggsheet, # escribo sheet cant_cuits
 
 range_write(resultados_a12_ggsheet, # escribo sheet duplicados_base
             sheet = "duplicados_base",
-            data = cuadro_5,
+            data = cuadro_5_2,
             reformat = FALSE)
 
 range_write(resultados_a12_ggsheet, # escribo sheet cant_cuits_local
             sheet = "cant_cuits_local",
-            data = cuadro_6,
+            data = cuadro_5_3,
             reformat = FALSE)
 
 range_write(resultados_a12_ggsheet, # escribo sheet direcciones
             sheet = "direcciones",
-            data = cuadro_7,
+            data = cuadro_5_4,
             reformat = FALSE)
