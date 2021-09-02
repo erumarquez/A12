@@ -132,7 +132,7 @@ cuadro_3 <- base |>
   mutate(participacion = monto / sum(monto)) |> 
   ungroup()
 
-## 05.04 Participación provincias por rubro ----
+## 05.04 Participación principales cuits por rubro ----
 
 cuadro_4 <- cuits |>
   filter(periodo >= !!mes) |>
@@ -165,15 +165,17 @@ cuadro_4 <- cuadro_4 |>
 
 
 cuadro_4 <- cuadro_4 |> left_join( 
-comercios |> 
+comercios |> # CHEQUEAR ESTO QUE NO ESTA DEJANDO 1 SOLO CUIT
   distinct(cuit, razon_social) |> 
   group_by(cuit) |> 
-  top_n(1, wt = "razon_social") |> 
+  slice(1) |> 
   ungroup() |> 
   mutate(cuit_aux = as.character(cuit)),
 by = "cuit_aux"
 ) |> 
   arrange(rubroa12, desc(monto))
 
+
+write_xlsx(cuadro_4, "asdas.xlsx")
 
 
