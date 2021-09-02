@@ -26,7 +26,6 @@ cuits <- read_csv("01.Bases/01.Raw/A12_CUIT_provincia_rubro_20210805.csv") |>
 
 comercios <- read_xlsx("01.Bases/01.Raw/A12_comercios.xlsx")
 
-
 # 03. Procesamiento -------------------------------------------------------
 
 ## 03.01 Participación monto ----
