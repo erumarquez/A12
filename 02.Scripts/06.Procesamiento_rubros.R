@@ -73,7 +73,7 @@ ecommerce_repartido <- gastos_ecommerce |>
   select(provincia, rubroa12 = rubroa12.y, cuit, monto = monto_nuevo, operaciones = operaciones_nuevo, periodo)
 
 
-asd <- cuits |>
+cuits <- cuits |>
   filter(cuit != commerce_cuit$cuit | rubroa12 != "First Data E-Commerce")
   bind_rows(ecommerce_repartido)
 
@@ -82,20 +82,20 @@ asd <- cuits |>
 
 # 04. Junto 3 rubros en "Electrodomésticos" --------------------------------------------------
 
-cuits <- cuits %>%
+cuits <- cuits |>
   mutate(rubroa12 = if_else(rubroa12 %in% c("Pequeños electrodomésticos", "Línea Blanca", "Televisores"),
                             "Electrodomésticos",
                             rubroa12))
 
-base <- base %>%
+base <- base |>
   mutate(rubroa12 = if_else(rubroa12 %in% c("Pequeños electrodomésticos", "Línea Blanca", "Televisores"),
                             "Electrodomésticos",
                             rubroa12))
 
 
-# 04. Procesamiento -------------------------------------------------------
+# 05. Procesamiento -------------------------------------------------------
 
-## 04.01 Participación monto ----
+## 05.01 Participación monto ----
 
 cuadro_1 <- base  |> 
   group_by(periodo, rubroa12) |> 
@@ -108,7 +108,7 @@ cuadro_1 <- base  |>
 cuadro_1 <- cuadro_1 |> 
   filter(periodo >= "2020-01-01")
 
-## 04.02 Participación operaciones ----
+## 05.02 Participación operaciones ----
 
 cuadro_2 <- base |>
   group_by(periodo, rubroa12) |> 
@@ -121,7 +121,7 @@ cuadro_2 <- base |>
 cuadro_2 <- cuadro_2 |> 
   filter(periodo >= "2020-01-01")
 
-## 04.03 Participación provincias por rubro ----
+## 05.03 Participación provincias por rubro ----
 
 cuadro_3 <- base |>
   filter(periodo >= !!mes) |> # filtro a partir de este mes
@@ -132,7 +132,7 @@ cuadro_3 <- base |>
   mutate(participacion = monto / sum(monto)) |> 
   ungroup()
 
-## 04.04 Participación provincias por rubro ----
+## 05.04 Participación provincias por rubro ----
 
 cuadro_4 <- cuits |>
   filter(periodo >= !!mes) |>
@@ -164,16 +164,16 @@ cuadro_4 <- cuadro_4 |>
   arrange(rubroa12, desc(monto))
 
 
-
 cuadro_4 <- cuadro_4 |> left_join( 
 comercios |> 
   distinct(cuit, razon_social) |> 
   group_by(cuit) |> 
-  top_n(1) |> 
+  top_n(1, wt = "razon_social") |> 
   ungroup() |> 
   mutate(cuit_aux = as.character(cuit)),
 by = "cuit_aux"
-)
+) |> 
+  arrange(rubroa12, desc(monto))
 
 
 
