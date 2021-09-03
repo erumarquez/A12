@@ -169,7 +169,7 @@ range_write(resultados_a12_ggsheet, # escribo sheet cant_cuits
             reformat = FALSE)
 
 range_write(resultados_a12_ggsheet, # escribo sheet duplicados_base
-            sheet = "duplicados_base",
+            sheet = "duplicados_base_comercio",
             data = cuadro_5_2,
             reformat = FALSE)
 
