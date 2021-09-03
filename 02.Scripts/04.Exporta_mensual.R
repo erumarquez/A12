@@ -15,7 +15,7 @@ cuadros <- cuadros %>% # paso fecha a caracter porque sino me pone numeros raros
 # 02.Subo resultados a googlesheet ---------------------------------------------
 
 ## Autorización googlesheets ----
-googledrive::drive_auth("lucas.e.peralta.mail@gmail.com")
+googledrive::drive_auth("mdointerno@gmail.com")
 gs4_auth(token = drive_token())
 
 

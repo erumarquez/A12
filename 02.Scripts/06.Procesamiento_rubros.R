@@ -192,7 +192,7 @@ cuadro_5 <- cuits |>
 
 ## 06.01 Autorización googlesheets ----
 
-googledrive::drive_auth("lucas.e.peralta.mail@gmail.com")
+googledrive::drive_auth("mdointerno@gmail.com")
 gs4_auth(token = drive_token())
 
 ## 06.02 Leo googlesheets ----
