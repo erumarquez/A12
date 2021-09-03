@@ -134,7 +134,7 @@ gs4_auth(token = drive_token())
 ## 04.02 Leo googlesheets ----
 
 resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1jh10T0S8-kwXnYVsXEDILyHTafOCZiA_i822LQVCUVk/edit#gid=0") |>
-  as.character() # Leo la googlesheet resultados_a12
+  as.character() # Leo la googlesheet
 
 gs4_browse(resultados_a12_ggsheet) # la abro en el explorador
 

@@ -43,7 +43,6 @@ commerce_cuit <- cuits |> # me quedo solo con los datos de e commerce que tienen
   ) |> 
   distinct(cuit)
 
-commerce_cuit
 
 ponderaciones_mdolibre <- ponderaciones_mdolibre |> # ponderaciones de gasto de mdo libre
   group_by(periodo, rubroa12) |> 
@@ -130,12 +129,13 @@ cuadro_3 <- base |>
   ungroup() |> 
   group_by(rubroa12) |> 
   mutate(participacion = monto / sum(monto)) |> 
-  ungroup()
+  ungroup() |> 
+  arrange(desc(participacion))
 
 ## 05.04 Participación principales cuits por rubro ----
 
 cuadro_4 <- cuits |>
-  filter(periodo >= !!mes) |>
+  filter(periodo >= !!mes) |> # se filtra a partir del mes seleccionado arriba
   group_by(rubroa12, cuit) |> 
   summarise(monto       = sum(monto),
             operaciones = sum(operaciones)) |> 
@@ -165,7 +165,7 @@ cuadro_4 <- cuadro_4 |>
 
 
 cuadro_4 <- cuadro_4 |> left_join( 
-comercios |> # CHEQUEAR ESTO QUE NO ESTA DEJANDO 1 SOLO CUIT
+comercios |> 
   distinct(cuit, razon_social) |> 
   group_by(cuit) |> 
   slice(1) |> 
@@ -173,9 +173,63 @@ comercios |> # CHEQUEAR ESTO QUE NO ESTA DEJANDO 1 SOLO CUIT
   mutate(cuit_aux = as.character(cuit)),
 by = "cuit_aux"
 ) |> 
-  arrange(rubroa12, desc(monto))
+  arrange(rubroa12, desc(monto)) |> 
+  rename(!! paste("monto acumulado desde", mes)        := monto,
+         !! paste("operaciones acumuladas desde", mes) := operaciones)
+
+## 05.05 Cantidad de cuits en el 2021 por rubro
+
+cuadro_5 <- cuits |> 
+  filter(periodo >= !!mes) |> 
+  distinct(rubroa12, cuit) |> 
+  count(rubroa12) |> 
+  arrange(desc(n)) |> 
+  rename(!! paste("cantidad de cuits desde", mes) := n)
+  
 
 
-write_xlsx(cuadro_4, "asdas.xlsx")
+# 06. Exportación -------------------------------------------------------------
 
+## 06.01 Autorización googlesheets ----
 
+googledrive::drive_auth("lucas.e.peralta.mail@gmail.com")
+gs4_auth(token = drive_token())
+
+## 06.02 Leo googlesheets ----
+
+resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/19KJIOsI4CAGeb8wkLC2jYW-3xBMhHghJmbbv-eZ9oYw/edit#gid=0") |>
+  as.character() # Leo la googlesheet
+
+#gs4_browse(resultados_a12_ggsheet) # la abro en el explorador
+
+## 06.03 Exporto ----
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_2_1
+            sheet = "slide_2_1",
+            data = cuadro_1,
+            reformat = FALSE,
+            range = "B1")
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_2_2
+            sheet = "slide_2_2",
+            data = cuadro_2,
+            reformat = FALSE,
+            range = "B1")
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_3
+            sheet = "slide_3",
+            data = cuadro_3,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_4_1
+            sheet = "slide_4_1",
+            data = cuadro_4,
+            reformat = FALSE,
+            range = "B1")
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_4_2
+            sheet = "slide_4_2",
+            data = cuadro_5,
+            reformat = FALSE,
+            range = "B1")
