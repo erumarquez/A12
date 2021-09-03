@@ -80,7 +80,8 @@ cuadro_3_1 <- cuadro_3_pre |>
   ungroup() |>
   group_by(provincia) |> 
   mutate(part = monto / sum(monto)) |> 
-  ungroup()
+  ungroup() |> 
+  arrange(desc(part))
 
 cuadro_3_2 <- cuadro_3_pre |> 
   filter(principal) |> 
