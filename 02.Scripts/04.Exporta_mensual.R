@@ -9,8 +9,8 @@ library(googlesheets4)
 
 cuadros <- readRDS("03.Output/02.Export/cuadros_export.rds")
 
-cuadros <- cuadros %>% # paso fecha a caracter porque sino me pone numeros raros en el googlesheet
-  map(~mutate(., periodo = as.character(periodo)))
+cuadros <- cuadros # %>% # paso fecha a caracter porque sino me pone numeros raros en el googlesheet
+#  map(~mutate(., periodo = as.character(periodo)))
 
 # 02.Subo resultados a googlesheet ---------------------------------------------
 
@@ -29,7 +29,8 @@ gs4_browse(resultados_a12_ggsheet) # la abro en el explorador
 range_write(resultados_a12_ggsheet, # escribo sheet slide_4
             sheet = "slide_4",
             data = cuadros[["Cuadro 1"]],
-            reformat = FALSE)
+            reformat = FALSE,
+            range = "A1")
 
 range_write(resultados_a12_ggsheet, # escribo sheet slide_5
             sheet = "slide_5",
