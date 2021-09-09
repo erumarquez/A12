@@ -10,7 +10,7 @@ mes <- "2021-07-01"
 
 # 02. Carga de librerías y bases -------------------------------------------
 
-install.packages("librarian")
+#install.packages("librarian")
 
 librarian::shelf(tidyverse, readxl, echarts4r, clock, writexl, googledrive, googlesheets4)
 
