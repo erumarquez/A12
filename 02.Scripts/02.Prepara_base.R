@@ -5,7 +5,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-07-01"
+mes <- "2021-08-01"
 
 
 
@@ -17,13 +17,13 @@ library(clock)
 library(writexl)
 
 
-base <- read_csv2("01.Bases/01.Raw/Base 202108+FD corregida (ultima).csv") %>%
+base <- read_csv("01.Bases/01.Raw/A12_mensual_20210902.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
   select(-año, -mes) %>%
   filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
          complete.cases(.),
-         cuotas %in% c(3, 6, 12, 18),
+         cuotas %in% c(3, 6, 12, 18, 24, 30),
          monto > 0)
 
 ponderaciones <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") %>% select(-operaciones, -monto)

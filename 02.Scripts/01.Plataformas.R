@@ -4,7 +4,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-07-01"
+mes <- "2021-08-01"
 
 
 
@@ -12,15 +12,17 @@ mes <- "2021-07-01"
 
 #install.packages("librarian")
 
-librarian::shelf(tidyverse, readxl, echarts4r, clock, writexl, googledrive, googlesheets4)
+#librarian::shelf(tidyverse, readxl, echarts4r, clock, writexl, googledrive, googlesheets4)
 
 rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
 
-plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20210802.csv") %>% # lectura de base plataformas
+plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20210906.csv") %>% # lectura de base plataformas
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
 
 plataformas <- plataformas %>% filter(plataforma == "Mercado Libre") # me quedo solo con mercado libre
+
+plataformas |> distinct(cuotas) |> arrange(cuotas)
 
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
                                       cuotas %in% c(3, 6, 12, 18)) # filtro cuotas 3, 6, 12 y 18
