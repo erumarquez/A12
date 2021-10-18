@@ -25,7 +25,7 @@ plataformas <- plataformas %>% filter(plataforma == "Mercado Libre") # me quedo 
 plataformas |> distinct(cuotas) |> arrange(cuotas)
 
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
-                                      cuotas %in% c(3, 6, 12, 18)) # filtro cuotas 3, 6, 12 y 18
+                                      cuotas %in% c(3, 6, 12, 18, 24, 30)) # filtro cuotas 3, 6, 12 y 18
 
 filas_con_missing <- plataformas %>% filter(!complete.cases(.))
 
