@@ -232,6 +232,16 @@ cuadro_8 <- cuadro_8 %>%
          var_inter   = ticket_promedio / lag(ticket_promedio, 2, order_by = periodo) - 1) %>% 
   ungroup()
 
+cuadro_8_aux <- cuadro_8 |> 
+  filter(cuotas %in% c(3, 18)) |> 
+  group_by(periodo, rubroa12) |> 
+  mutate(cociente_ticket_prom_18_3 = ticket_promedio / lag(ticket_promedio, n = 1L, order_by = as.integer(cuotas))) |> 
+  ungroup() |> 
+  filter(!is.na(cociente_ticket_prom_18_3))
+
+cuadro_8 <- cuadro_8 |> 
+  left_join(cuadro_8_aux)
+
 cuadro_8_1 <- base %>% 
   group_by(periodo) %>% 
   summarise(ticket_promedio = sum(monto) / sum(operaciones)) %>% 
@@ -283,7 +293,10 @@ cuadro_10_1 <- base %>%
   ungroup() %>% 
   left_join(poblacion, by = "provincia") %>% 
   mutate(monto_per_capita = monto / poblacion) %>% 
-  filter(periodo >= "2020-01-01")
+  filter(periodo >= "2020-01-01") |> 
+  group_by(provincia) |> 
+  mutate(var_mensual_monto_pc = monto_per_capita / lag(monto_per_capita, n = 1L, order_by = periodo) - 1) |> 
+  ungroup()
 
 cuadro_10_2 <- cuadro_10_1 %>% group_by(periodo, region) %>% 
   summarise(poblacion = sum(poblacion),
