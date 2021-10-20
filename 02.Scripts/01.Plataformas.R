@@ -4,19 +4,18 @@ rm(list = ls())
 
 
 
-mes <- "2021-08-01"
+mes <- "2021-09-01"
 
 
 
 # 02. Carga de librerías y bases -------------------------------------------
 
-#install.packages("librarian")
-
-#librarian::shelf(tidyverse, readxl, echarts4r, clock, writexl, googledrive, googlesheets4)
+paquetes <- c("tidyverse", "readxl", "echarts4r", "clock", "writexl", "googledrive", "googlesheets4")
+lapply(paquetes, library, character.only = TRUE)
 
 rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
 
-plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20210906.csv") %>% # lectura de base plataformas
+plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211004.csv") %>% # lectura de base plataformas
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
 

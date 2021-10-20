@@ -5,7 +5,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-08-01"
+mes <- "2021-09-01"
 
 
 
@@ -17,7 +17,7 @@ library(clock)
 library(writexl)
 
 
-base <- read_csv("01.Bases/01.Raw/A12_mensual_20210902.csv") %>%
+base <- read_csv("01.Bases/01.Raw/A12_mensual_20211007.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
   select(-año, -mes) %>%
