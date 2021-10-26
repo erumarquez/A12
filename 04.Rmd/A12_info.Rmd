@@ -1,0 +1,45 @@
+---
+title: "Programa Ahora 12"
+author: "Dirección Nacional de Políticas para el Desarrollo del Mercado Interno"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Sobre el programa
+
+asdasd
+
+## Bases de datos
+
+-   Base Medios de pagos
+
+Frecuencia: Mensual.
+
+Variables: 1.anio 2.mes 3.provincia 4.rubroa12 5.marca_medio_pago 6.monto 7.operaciones 8.cuotas
+
+Nombre del archivo en Cloud, ejemplo: "A12_mensual_20211007.zip"
+
+Archivo del .zip que se usa: "A12_mensual_20211007.csv"
+
+-   Base Plataformas
+
+Frecuencia: Mensual.
+
+Variables: 1.anio 2.mes 3.plataforma 4.provincia 5.rubroa12 6.operaciones 7.monto 8.cuotas
+
+Nombre del archivo en Cloud, ejemplo: "A12_plataformas_20211004.zip"
+
+Archivo del .zip que se usa: "A12_plataformas_mensual_20211004.csv"
+
+-   Base Agrupadores
+
+Frecuencia: Mensual.
+
+Variables: 1.anio , 2.mes, 3.agrupador, 4.provincia, 5.descrubroa12, 6.monto 7.operaciones, 8.cuotas
+
+Nombre del archivo en Cloud, ejemplo: "A12_agrupadores_meli_20211004.zip"
+
+Archivo del .zip que se usa: "A12_agrupadores_meli_mensual_20211004". El archivo contiene "meli" en su nombre, entiendo que haciendo referencia a Mercado Libre pero no es el único agrupador dentro de la base.
