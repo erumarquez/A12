@@ -24,7 +24,9 @@ Nombre del archivo en Cloud, ejemplo: "A12_mensual_20211007.zip"
 
 Archivo del .zip que se usa: "A12_mensual_20211007.csv"
 
--   Base Plataformas
+-   Base Plataformas de Comercio Electrónico
+
+En esta base encontramos información de plataformas como "Correo Compras - Plataforma" y "Mercado Libre".
 
 Frecuencia: Mensual.
 
@@ -34,7 +36,9 @@ Nombre del archivo en Cloud, ejemplo: "A12_plataformas_20211004.zip"
 
 Archivo del .zip que se usa: "A12_plataformas_mensual_20211004.csv"
 
--   Base Agrupadores
+-   Base Agrupadores de Pago Digital
+
+En esta base se encuentra información de agrupadores de pago como "Correo Compras - Agrupador" , "Mercado Libre", "Mercado Pago", "Mobbex", "Pago Virtual del Sur", "Santander", "Taca Taca", "Todo Pago", "UALA" y "Zoco".
 
 Frecuencia: Mensual.
 
@@ -43,3 +47,23 @@ Variables: 1.anio , 2.mes, 3.agrupador, 4.provincia, 5.descrubroa12, 6.monto 7.o
 Nombre del archivo en Cloud, ejemplo: "A12_agrupadores_meli_20211004.zip"
 
 Archivo del .zip que se usa: "A12_agrupadores_meli_mensual_20211004". El archivo contiene "meli" en su nombre, entiendo que haciendo referencia a Mercado Libre pero no es el único agrupador dentro de la base.
+
+
+## Procesamiento
+
+01.Plataformas.R
+
+Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente.
+
+
+02.Prepara_base.R
+
+En la base total de medios de pagos, hay 2 rubros que se llaman "First Data E-Commerce" y "Otros", según se observó en su momento estos dos rubros corresponden a las compras de mercado libre, entonces lo que se hace es utilizar las participaciones obtenidas de plataformas para 
+
+
+
+
+
+
+
+

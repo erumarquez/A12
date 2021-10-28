@@ -19,10 +19,12 @@ plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211004.csv") 
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
 
+## 02.01 Filtro solo mercado libre ----
 plataformas <- plataformas %>% filter(plataforma == "Mercado Libre") # me quedo solo con mercado libre
 
 plataformas |> distinct(cuotas) |> arrange(cuotas)
 
+## 02.01 Filtro las cuotas que quiero ----
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
                                       cuotas %in% c(3, 6, 12, 18, 24, 30)) # filtro cuotas 3, 6, 12 y 18
 

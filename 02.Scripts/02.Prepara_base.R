@@ -88,7 +88,6 @@ write_xlsx(export, "03.Output/01.Chequeos/base_final_a12.xlsx")
 
 # 05. Chequeo -------------------------------------------------------------
 
-
 chequeo2 <- export %>% group_by(periodo, provincia, cuotas) %>% 
   summarise(suma_monto       = sum(monto),
             suma_operaciones = sum(operaciones)) %>% 
@@ -104,6 +103,5 @@ by = c("periodo", "provincia", "cuotas"), suffix = c("_clean", "_raw")
   mutate(chequeo_monto = suma_monto_clean == suma_monto_raw,
          chequeo_operaciones = suma_operaciones_clean == suma_operaciones_raw,
          diferencia_operacioens = suma_operaciones_clean - suma_operaciones_raw)
-
 
 
