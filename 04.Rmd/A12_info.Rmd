@@ -51,9 +51,9 @@ Archivo del .zip que se usa: "A12_agrupadores_meli_mensual_20211004". El archivo
 
 ## Procesamiento
 
-01.Plataformas.R
+01.Plataformas_ponderaciones.R
 
-Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente.
+Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente. Tener en cuenta que para esto solo se esta considerando mercado pago.
 
 
 02.Prepara_base.R
@@ -61,7 +61,9 @@ Lo que se hace es tomar la base de plataformas para obtener las participaciones 
 En la base total de medios de pagos, hay 2 rubros que se llaman "First Data E-Commerce" y "Otros", según se observó en su momento estos dos rubros corresponden a las compras de mercado libre, entonces lo que se hace es utilizar las participaciones obtenidas de plataformas para repartir estos gastos por período y por cuota. Es decir, se toma el gasto y las operaciones en 12 cuotas de estos 2 rubros para un período y se reparte usando el marco de ponderaciones generado en el script "01.Plataformas.R", puede suceder que en algún período y en alguna cuota en particular exista poca cantidad de operaciones entonces al ser repartida esta cantidad de acuerdo a las ponderaciones, quede alguna con un valor menor a cero, lo que se hace es redondearlas a 1, es por esto que en operaciones quizas no sean iguales los totales al comparar entre ambas resultados, pero si en monto ya que nunca queda nada menor a 1. Luego de terminado este procesamiento se dispone de la base final para realizar obtener los indicadores deseados.
 
 
+07.PCE.R
 
+Tener en cuenta que está corre compras también. Voy a hacer todo el análisis con los dos adentro (correo compras y mercado libre), lo que hay de correo compras es marginal. aclarar en alguna parte cuanto representa, y en que región esta concentrado.
 
 
 
