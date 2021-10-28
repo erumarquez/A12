@@ -15,6 +15,8 @@ lapply(paquetes, library, character.only = TRUE)
 
 rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
 
+source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
+
 plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211004.csv") %>% # lectura de base plataformas
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
@@ -40,7 +42,6 @@ unique(plataformas$provincia)
 
 ## Se transforma "Máquinas y Herramientas" en "Materiales para la construcción" ----
 plataformas <- plataformas %>% mutate(rubroa12 = if_else(rubroa12 == "Máquinas y Herramientas", "Materiales para la construcción", rubroa12))
-
 
 ## Operaciones y monto por provincia, por plataforma y periodo ----
 resumen1 <- plataformas %>%
@@ -121,7 +122,7 @@ resumen3 %>%
 
 # 04. Cálculo de participaciones de las cuotas por rubros -----------------
 
-## Aquí se obtiene la estructura de gasto dentro de cada cuota, abierto por rubro ----
+## Aquí se obtiene la estructura de gasto dentro de cada cuota en cada periodo, abierto por rubro ----
 
 chequeo1 <- plataformas %>% distinct(rubroa12) %>% mutate(rubros_plataformas = "rubros_plataformas") %>% full_join(rubrosa12 %>% mutate(rubros_base_total = "rubros_base_total"))
 
@@ -212,7 +213,7 @@ resumen4 %>%
   e_line(part_monto_en_cuota) %>%
   e_tooltip()
   
-### Para completar periodos para atras ----
+### Para completar periodos para atrás ----
 
 # La base tiene datos desde Abril de 2020, voy a completarla hacia atrás con el promedio de abril 2020 - sep 2020
 

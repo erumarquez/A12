@@ -1,75 +1,76 @@
 rm(list = ls())
-# 01. Carga de librerías y bases -------------------------------------------
 
-library(tidyverse)
-library(readxl)
-library(clock)
-library(writexl)
+# 01. Seleccionar el último mes con datos completos -----------------------
 
 
-base <- readRDS("01.Bases/02.Clean/base_final_a12.rds") %>%
-  select(periodo, provincia, rubroa12, marca_medio_pago, cuotas, operaciones, monto)
 
-# Exploración:
-base %>% filter(!complete.cases(.))
-unique(base$marca_medio_pago)
-unique(base$rubroa12)
-unique(base$cuotas)
-unique(base$periodo)
+mes <- "2021-09-01"
 
-source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
+
+
+# 02. Carga de librerías y bases -------------------------------------------
+
+paquetes <- c("tidyverse", "readxl", "echarts4r", "clock", "writexl", "googledrive", "googlesheets4")
+lapply(paquetes, library, character.only = TRUE)
 
 poblacion <- readRDS("01.Bases/02.clean/poblacion.rds")
 
+rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
 
-# 02. Procesamiento -------------------------------------------------------
+source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
+
+plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211004.csv") %>% # lectura de base plataformas
+  rename(año = anio) %>%
+  mutate(periodo = date_build(año, mes))
+
+
+# 03.Procesamiento --------------------------------------------------------
+
+plataformas |> distinct(cuotas) |> arrange(cuotas)
+
+## Filtro las cuotas que quiero ----
+plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
+                                      cuotas %in% c(3, 6, 12, 18, 24, 30)) # filtro cuotas 3, 6, 12 y 18
+ 
+filas_con_missing <- plataformas %>% filter(!complete.cases(.)) # filas con missing
 
 ## Se colapsan 3 rubros en 1 ----
 
-base <- base %>%
+base <- plataformas %>%
   mutate(rubroa12 = if_else(rubroa12 %in% c("Pequeños electrodomésticos", "Línea Blanca", "Televisores"),
                             "Electrodomésticos",
                             rubroa12))
 
 unique(base$rubroa12)
 
+## Se transforma "Máquinas y Herramientas" en "Materiales para la construcción" ----
+base <- base %>% mutate(rubroa12 = if_else(rubroa12 == "Máquinas y Herramientas", "Materiales para la construcción", rubroa12))
+
+
 ## Deflactación de monto, base enero 2019 ----
 
-base <- base %>%
-  left_join(ipc %>% select(-ipc_indec_ng, -variacion_mensual), by = "periodo") %>% 
+base <- base |> 
+  left_join(ipc |> select(-ipc_indec_ng, -variacion_mensual), by = "periodo") %>% 
   mutate(monto_constante = monto / coef_deflactor)
 
-## Slides 4, 5 y 6 ----
 
-#### Monto corriente ----
-cuadro_1 <- base %>%
-  group_by(periodo) %>% # monto corriente
-  summarise(monto_corriente = sum(monto)) %>% 
-  ungroup() %>% 
-  arrange(periodo) %>% 
-  mutate(var_mensual = (monto_corriente / lag(monto_corriente, 1, order_by = periodo) - 1 ))
-
-#### Monto constante ----
-cuadro_2 <- base %>%
-  group_by(periodo) %>% 
-  summarise(monto_constante = sum(monto_constante)) %>% 
-  ungroup() %>% 
-  arrange(periodo) %>% 
-  mutate(var_mensual = (monto_constante / lag(monto_constante, 1, order_by = periodo) - 1 ))
-
-#### Operaciones ----
-cuadro_3 <- base %>%
-  group_by(periodo) %>% 
-  summarise(operaciones = sum(operaciones)) %>% 
-  ungroup() %>% 
-  arrange(periodo) %>% 
-  mutate(var_mensual = (operaciones / lag(operaciones, 1, order_by = periodo) - 1 ))
+## Primer Cuadro ----
+pce_cuadro1 <- base |> 
+  group_by(periodo) |> 
+  summarise(operaciones = sum(operaciones),
+            monto_corriente = sum(monto),
+            monto_constante = sum(monto_constante)) |> 
+  ungroup() |> 
+  arrange(periodo) |> 
+  mutate(var_mensual_corr           = monto_corriente / lag(monto_corriente, 1, order_by = periodo) - 1,
+         var_mensual_constante      = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
+         var_mensual_operaciones    = operaciones / lag(operaciones, 1, order_by = periodo) - 1,
+         var_interanual_corr        = monto_corriente / lag(monto_corriente, 12, order_by = periodo) - 1,
+         var_interanual_constante   = monto_constante / lag(monto_constante, 12, order_by = periodo) - 1,
+         var_interanual_operaciones = operaciones / lag(operaciones, 12, order_by = periodo) - 1)
 
 
-
-## Slides 7 y 8 ----
-
-### Principales 7 rubros del último mes por monto corriente ----
+## Principales 7 rubros del último mes por monto corriente ----
 principales_7_rubros_monto <- base %>%
   filter(periodo == max(periodo)) %>%
   group_by(periodo, rubroa12) %>% 
@@ -78,11 +79,9 @@ principales_7_rubros_monto <- base %>%
   arrange(desc(monto)) %>% 
   head(7)
 
-
 aux_base_1 <- base %>% 
   mutate(agrupar        = if_else(rubroa12 %in% (principales_7_rubros_monto$rubroa12), FALSE, TRUE),
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
-
 
 cuadro_4 <- aux_base_1 %>%
   group_by(periodo, rubro_auxiliar) %>% 
@@ -112,10 +111,8 @@ cuadro_4 <- cuadro_4 %>%
   arrange(periodo, auxi_ordena, desc(monto)) %>% 
   select(-auxi_ordena)
 
-# exportar alguna base completa
 
-
-### Principales 7 rubros del último mes por operaciones ----
+## Principales 7 rubros del último mes por operaciones ----
 
 principales_7_rubros_operaciones <- base %>%
   filter(periodo == max(periodo)) %>%
@@ -125,11 +122,9 @@ principales_7_rubros_operaciones <- base %>%
   arrange(desc(operaciones)) %>% 
   head(7)
 
-
 aux_base_2 <- base %>% 
   mutate(agrupar        = if_else(rubroa12 %in% (principales_7_rubros_operaciones$rubroa12), FALSE, TRUE),
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
-
 
 cuadro_5 <- aux_base_2 %>%
   group_by(periodo, rubro_auxiliar) %>% 
@@ -154,12 +149,7 @@ cuadro_5 <- cuadro_5 %>%
   arrange(periodo, auxi_ordena, desc(operaciones)) %>% 
   select(-auxi_ordena)
 
-
-# exportar alguna base completa
-
-## Slide 9 ----
-
-### Participaciones por cuotas. Total base ----
+## Participaciones por cuotas. Total base ----
 
 cuadro_6 <- base %>%
   group_by(periodo, cuotas) %>% 
@@ -174,9 +164,7 @@ cuadro_6_resumen <- cuadro_6 %>%
   arrange(periodo)
 
 
-#write_xlsx(cuadro_6, "export_3.xlsx")
-
-### Participaciones por cuotas. Para cada uno de los 7 principales rubros ----
+## Participaciones por cuotas. Para cada uno de los 7 principales rubros ----
 
 aux_base_3 <- base %>%
   filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
@@ -192,7 +180,7 @@ cuadro_7 <- aux_base_3 %>%
 cuadro_7_resumen <- cuadro_7 %>% filter(periodo == max(periodo))
 
 
-## Slide 10 ----
+## Var mensual e inter Monto y operaciones, ticket promedio por rubros principales ----
 
 aux_base_4 <- base %>%
   filter(rubroa12 %in% principales_7_rubros_monto$rubroa12)
@@ -240,41 +228,8 @@ cuadro_8_1 <- base %>%
   ungroup()
 
 
-## Slide 11 ----
+## cuadros per capita ----
 
-cuadro_9_1 <- base %>% 
-  group_by(periodo, provincia) %>% 
-  summarise(monto = sum(monto)) %>% 
-  ungroup() %>% 
-  group_by(periodo) %>% 
-  mutate(participacion = monto / sum(monto)) %>% 
-  ungroup() %>%
-  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>% 
-  arrange(periodo) %>% 
-  group_by(provincia) %>% 
-  mutate(var_mensual = monto / lag(monto, 1, order_by = periodo) - 1,
-         var_inter   = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
-  ungroup()
-
-
-cuadro_9_2 <- base %>%
-  left_join(poblacion %>% select(provincia, region)) %>% 
-  group_by(periodo, region) %>% 
-  summarise(monto = sum(monto)) %>% 
-  ungroup() %>% 
-  group_by(periodo) %>% 
-  mutate(participacion = monto / sum(monto)) %>% 
-  ungroup() %>%
-  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>% 
-  arrange(periodo) %>% 
-  group_by(region) %>% 
-  mutate(var_mensual = monto / lag(monto, 1, order_by = periodo) - 1,
-         var_inter   = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
-  ungroup()
-
-  
-  
-## Slide 12 ----
 
 pob_tot <- poblacion %>%
   summarise(poblacion_pais = sum(poblacion)) %>% pull(1)
@@ -309,26 +264,111 @@ cuadro_10_3 <- base %>%
   filter(monto == max(monto)) %>% 
   ungroup()
 
-
-# completar slide 12
-
-# 03. Exportación ---------------------------------------------------------
+## participación de plataformas ----
 
 
-cuadros_export <- list("Cuadro 1"     = cuadro_1,
-                       "Cuadro 2"     = cuadro_2,
-                       "Cuadro 3"     = cuadro_3,
-                       "Cuadro 4"     = cuadro_4,
-                       "Cuadro 5"     = cuadro_5,
-                       "Cuadro 6"     = cuadro_6_resumen,
-                       "Cuadro 7"     = cuadro_7_resumen,
-                       "Cuadro 8"     = cuadro_8,
-                       "Cuadro 8.1"   = cuadro_8_1,
-                       "Cuadro 9.1"   = cuadro_9_1,
-                       "Cuadro 9.2"   = cuadro_9_2,
-                       "Cuadro 10.1"  = cuadro_10_1,
-                       "Cuadro 10.2"  = cuadro_10_2,
-                       "Cuadro 10.3"  = cuadro_10_3)
+participaciones_plataformas <- base |> 
+  filter(periodo == max(periodo)) |> 
+  group_by(plataforma) |> 
+  summarise(monto = sum(monto),
+            operaciones = sum(operaciones)) |> 
+  ungroup()
+
+correo_compras_provincia <- base |> 
+  filter(periodo == max(periodo),
+         plataforma == "Correo Compras - Plataforma") |> 
+  group_by(provincia, plataforma)|> 
+  summarise(monto = sum(monto),
+            operaciones = sum(operaciones))|> 
+  ungroup()
+  
 
 
-saveRDS(cuadros_export, "03.Output/02.Export/cuadros_export.rds")
+# 02.Subo resultados a googlesheet ---------------------------------------------
+
+## Autorización googlesheets ----
+googledrive::drive_auth("mdointerno@gmail.com")
+gs4_auth(token = drive_token())
+
+
+## Leo googlesheets ----
+
+resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1bAsrjZN32t5-iK3D5rTAaPwoBHQ0ldc9WPTs1X7nBYE/edit#gid=0") %>%
+  as.character()
+
+gs4_browse(resultados_a12_ggsheet)
+
+## Escribo ----
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 1",
+            data = pce_cuadro1,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 2",
+            data = cuadro_4,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 3",
+            data = cuadro_5,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 4",
+            data = cuadro_6_resumen,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 5",
+            data = cuadro_7_resumen,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 6",
+            data = cuadro_8,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 7",
+            data = cuadro_8_1,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 8",
+            data = cuadro_10_1,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 9",
+            data = cuadro_10_2,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 10",
+            data = cuadro_10_3,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 11",
+            data = participaciones_plataformas,
+            reformat = FALSE,
+            range = "A1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 12",
+            data = correo_compras_provincia,
+            reformat = FALSE,
+            range = "A1")
+
