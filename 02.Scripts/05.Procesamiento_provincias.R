@@ -19,7 +19,7 @@ library(googlesheets4)
 
 base <- readRDS("01.Bases/02.Clean/base_final_a12.rds")
 
-cuits <- read_csv("01.Bases/01.Raw/A12_CUIT_provincia_rubro_20210805.csv") |>
+cuits <- read_csv("01.Bases/01.Raw/A12_CUIT_provincia_rubro_20211007.csv") |>
   rename("año" = anio) |>
   mutate(periodo = date_build(año, mes)) |> 
   select(-año, -mes)
