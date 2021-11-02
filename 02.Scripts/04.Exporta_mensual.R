@@ -21,7 +21,7 @@ gs4_auth(token = drive_token())
 
 ## Leo googlesheets ----
 
-resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/1kKT75fNVb8-5rFwrBumNIvTUlQAfDcnHJGMy7niY9f8/edit#gid=386411844") %>%
+resultados_a12_ggsheet <- as_sheets_id("https://docs.google.com/spreadsheets/d/18d9AL7J93jWdChlS2TwdGiUgBtfl-GsZxwbQfsgQcoo/edit") %>%
   as.character() # Leo la googlesheet resultados_a12
 
 gs4_browse(resultados_a12_ggsheet) # la abro en el explorador
