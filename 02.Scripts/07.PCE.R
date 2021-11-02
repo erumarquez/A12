@@ -268,16 +268,19 @@ cuadro_10_3 <- base %>%
 
 
 participaciones_plataformas <- base |> 
-  filter(periodo == max(periodo)) |> 
-  group_by(plataforma) |> 
+  group_by(periodo, plataforma) |> 
   summarise(monto = sum(monto),
             operaciones = sum(operaciones)) |> 
-  ungroup()
+  ungroup() |> 
+  group_by(periodo) |> 
+  mutate(part_monto = monto / sum(monto),
+         part_op    = operaciones / sum(operaciones)) |> 
+  ungroup() |> 
+  arrange(periodo, plataforma)
 
 correo_compras_provincia <- base |> 
-  filter(periodo == max(periodo),
-         plataforma == "Correo Compras - Plataforma") |> 
-  group_by(provincia, plataforma)|> 
+  filter(plataforma != "Mercado Libre") |> 
+  group_by(periodo, provincia, plataforma)|> 
   summarise(monto = sum(monto),
             operaciones = sum(operaciones))|> 
   ungroup()
