@@ -83,7 +83,12 @@ part_agrupadores <- base |>
   mutate(part_monto = monto / sum(monto),
          part_op    = operaciones / sum(operaciones)) |> 
   ungroup() |> 
-  arrange(periodo, agrupador)
+  arrange(periodo, agrupador, monto)
+
+part_agrupadores_aux <- part_agrupadores |> 
+  filter(periodo == max(periodo)) |> 
+  arrange(desc(monto)) |> 
+  distinct(agrupador)
 
 
 ## Principales 7 rubros del último mes por monto corriente ----
@@ -308,6 +313,13 @@ range_write(resultados_a12_ggsheet,
             data = part_agrupadores,
             reformat = FALSE,
             range = "B1")
+
+range_write(resultados_a12_ggsheet, 
+            sheet = "Hoja 2",
+            data = part_agrupadores_aux,
+            reformat = FALSE,
+            col_names = FALSE,
+            range = "K3")
 
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 3",
