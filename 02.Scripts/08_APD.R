@@ -19,7 +19,8 @@ source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera v
 
 agrupadores <- read_csv("01.Bases/01.Raw/A12_agrupadores_meli_mensual_20211004.csv") |>  # lectura de base agrupadores
   rename(año = anio, rubroa12 = descrubroa12) |> 
-  mutate(periodo = date_build(año, mes))
+  mutate(periodo = date_build(año, mes)) |> 
+  filter(agrupador != "Mercado Libre")
 
 
 # 03.Procesamiento --------------------------------------------------------
@@ -306,7 +307,7 @@ range_write(resultados_a12_ggsheet,
             sheet = "Hoja 2",
             data = part_agrupadores,
             reformat = FALSE,
-            range = "A1")
+            range = "B1")
 
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 3",
