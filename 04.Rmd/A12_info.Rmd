@@ -1,15 +1,28 @@
 ---
-title: "Programa Ahora 12"
+title: "Proyecto en R del Programa Ahora 12"
 author: "Dirección Nacional de Políticas para el Desarrollo del Mercado Interno"
-output: pdf_document
+output:
+  pdf_document:
+    dev: cairo_pdf
+    fig_caption: yes
+    latex_engine: xelatex
 urlcolor: blue
+header-includes:
+  - \usepackage{fontspec}
+  - \setmainfont{Calibri}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+En este documento se listan en forma resumida las bases de datos y scripts involucrados en el proyecto. La idea de este proyecto fue hacer mas eficiente todo el procesamiento necesario para elaborar los informes sobre el programa Ahora 12, ganando en tiempo y reduciendo errores de trabajo manual.
+
 ## Bases de datos
+
+### Bases Raw
+
+Estas son bases que se reemplazan o actualizan periodicamente.
 
 -   Base Medios de pagos
 
@@ -45,11 +58,37 @@ Nombre del archivo en Cloud, ejemplo: "A12_agrupadores_meli_20211004.zip"
 
 Archivo del .zip que se usa: "A12_agrupadores_meli_mensual_20211004". El archivo contiene "meli" en su nombre, entiendo que haciendo referencia a Mercado Libre pero no es el único agrupador dentro de la base.
 
+-   Indice de precios
+
+En este excel se deben ir completando a medida que se publica (o se estima) el resultado mensual del nivel general del Indice de Precios al Consumidor de Indec Nacional. Nombre del archivo: "ipc.xlsx"
+
+### Bases Clean
+
+Estas son bases que se generan en scripts a partir de las bases raw y bases que se deben actualizar excepcionalmente.
+
+-   base_final_a12.rds  
+
+Es resultado de un script y se utiliza como insumo de otros scripts de análisis.
+
+-   lista_rubrosa12.rds
+
+Esta base es una lista de rubros que se utiliza en el script "01.Plataformas_ponderaciones.R". Debe vez en cuando chequearse para ver si están bien esos rubros.
+
+-   porblacion.rds
+
+Contiene datos de población. En algún momento puede actualizarse si existen datos nuevos.
+
+-   pond_plataformas.rds
+
+Es resultado de un script y se utiliza como insumo de otros scripts de análisis.
+
 ## Scripts
+
+De acuerdo a lo que se necesite generar se corren ciertos scripts, los que siempre deben correrse con las bases de datos que consume actualizadas son el 01 y 02. Dentro de cada script al inicio quizás haya una linea en el que se deba indicar cual es el último mes con datos actualizados. Los scripts escriben en spreadsheets de googledrive de la cuenta mdointerno@gmail.com, la clave de esta cuenta se pasa por otro medio por seguridad.
 
 01.Plataformas_ponderaciones.R
 
-Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente. Tener en cuenta que para esto solo se esta considerando mercado pago. El script toma un rds que tiene los rubros de a12, este archivo debe ser chequeado para ver si esta ok. Hay que tener en cuenta también que se filtran solo las cuotas de interés, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado.
+Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente. Tener en cuenta que para esto solo se esta considerando mercado pago. El script toma un rds que tiene los rubros de a12, este archivo debe ser chequeado para ver si esta ok. Hay que tener en cuenta también que se filtran solo las cuotas de interés, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado. En este script se crean objetos "chequeo" para ver si hay algo raro.
 
 02.Prepara_base.R
 
@@ -67,7 +106,11 @@ Se escribe en un [spreadsheet](https://docs.google.com/spreadsheets/d/18d9AL7J93
 
 05.Procesamiento_provincias.R
 
+Genera resultados para el informe por provincias que a veces se requiere. Se colapsan 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos". Los resultados se exportan en la [spreadsheet](https://docs.google.com/spreadsheets/d/1jh10T0S8-kwXnYVsXEDILyHTafOCZiA_i822LQVCUVk) en el drive.
 
+06.Procesamiento_rubros.R
+
+Genera resultados para el informe por rubro que a veces se requiere. Se colapsan 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos". Los resultados se exportan en la [spreadsheet](https://docs.google.com/spreadsheets/d/19KJIOsI4CAGeb8wkLC2jYW-3xBMhHghJmbbv-eZ9oYw) en el drive.
 
 07.PCE.R
 
