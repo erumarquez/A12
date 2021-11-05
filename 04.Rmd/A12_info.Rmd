@@ -2,15 +2,12 @@
 title: "Programa Ahora 12"
 author: "Dirección Nacional de Políticas para el Desarrollo del Mercado Interno"
 output: pdf_document
+urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-## Sobre el programa
-
-asdasd
 
 ## Bases de datos
 
@@ -48,32 +45,39 @@ Nombre del archivo en Cloud, ejemplo: "A12_agrupadores_meli_20211004.zip"
 
 Archivo del .zip que se usa: "A12_agrupadores_meli_mensual_20211004". El archivo contiene "meli" en su nombre, entiendo que haciendo referencia a Mercado Libre pero no es el único agrupador dentro de la base.
 
-
-## Procesamiento
+## Scripts
 
 01.Plataformas_ponderaciones.R
 
-Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente. Tener en cuenta que para esto solo se esta considerando mercado pago. El script toma un rds que tiene los rubros de a12, este archivo debe ser chequeado para ver si esta ok. Hay que tener en cuenta también que se filtran solo las cuotas de interes, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado.
-
+Lo que se hace es tomar la base de plataformas para obtener las participaciones de gastos y operaciones de los rubros en cada una de las cuotas por período de mercado libre, por ejemplo, dentro de la cuota 12 para un determinado mes, cuanto participa en gasto y operaciones cada uno de los rubros. Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente. Tener en cuenta que para esto solo se esta considerando mercado pago. El script toma un rds que tiene los rubros de a12, este archivo debe ser chequeado para ver si esta ok. Hay que tener en cuenta también que se filtran solo las cuotas de interés, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado.
 
 02.Prepara_base.R
 
-En la base total de medios de pagos, hay 2 rubros que se llaman "First Data E-Commerce" y "Otros", según se observó en su momento estos dos rubros corresponden a las compras de mercado libre, entonces lo que se hace es utilizar las participaciones obtenidas de plataformas para repartir estos gastos por período y por cuota. Es decir, se toma el gasto y las operaciones en 12 cuotas de estos 2 rubros para un período y se reparte usando el marco de ponderaciones generado en el script "01.Plataformas.R", puede suceder que en algún período y en alguna cuota en particular exista poca cantidad de operaciones entonces al ser repartida esta cantidad de acuerdo a las ponderaciones, quede alguna con un valor menor a cero, lo que se hace es redondearlas a 1, es por esto que en operaciones quizás no sean iguales los totales al comparar entre ambas resultados, pero si en monto ya que nunca queda nada menor a 1. Luego de terminado este procesamiento se dispone de la base final para realizar obtener los indicadores deseados. Hay que tener en cuenta también que se filtran solo las cuotas de interés para analizar, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado.
+En la base total de medios de pagos, hay 2 rubros que se llaman "First Data E-Commerce" y "Otros", según se observó en su momento estos dos rubros corresponden a las compras de mercado libre, entonces lo que se hace es utilizar las participaciones obtenidas de plataformas para repartir estos gastos por período y por cuota. Para ejemplificar, se toma el gasto y las operaciones en 12 cuotas de estos 2 rubros para un período y se reparte usando el marco de ponderaciones generado en el script "01.Plataformas.R", puede suceder que en algún período y en alguna cuota en particular exista poca cantidad de operaciones entonces al ser repartida esta cantidad de acuerdo a las ponderaciones, quede alguna con un valor menor a cero, lo que se hace es redondearlas a 1, es por esto que en operaciones quizás no sean iguales los totales al comparar entre ambas resultados, pero si en monto ya que nunca queda nada menor a 1. Terminado este procesamiento se dispone de la base final para realizar los análisis requeridos. Hay que tener en cuenta también que se filtran solo las cuotas de interés para analizar, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado.
+
+03.Procesamiento_mensual.R  
+
+Utilizan: la base generada en el script "02.Prepara_base.R", una base que tiene los datos de población y se llama el script auxiliar "Auxiliares/01.Carga_ipc.R" que trae lo necesario para deflactar las series.
+Se colapsan 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos".
+Este script genera los resultados necesarios para el reporte central de a12.
+
+04.Exporta_mensual.R  
+
+Se escribe en un [spreadsheet](https://docs.google.com/spreadsheets/d/18d9AL7J93jWdChlS2TwdGiUgBtfl-GsZxwbQfsgQcoo) los resultados generados en el script "03.Procesamiento_mensual.R"
+
+05.Procesamiento_provincias.R
+
 
 
 07.PCE.R
 
-Tener en cuenta que está Correo Compras también. Voy a hacer todo el análisis con los dos adentro (correo compras y mercado libre), lo que hay de correo compras es marginal. Los resultados que generé son análogos al análisis para la base total, sumando 2 hojas que tienen la participación de Correo Compras en el total para aclarar que es muy poco y en que zona se concentra.  Hay que tener en cuenta también que se filtran solo las cuotas de interés para analizar, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado.  Otra cosa que se hace es colapsar 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos".
+Tener en cuenta que está Correo Compras también. Voy a hacer todo el análisis con los dos adentro (correo compras y mercado libre), lo que hay de correo compras es marginal. Los resultados que generé son análogos al análisis para la base total, sumando 2 hojas que tienen la participación de Correo Compras en el total para aclarar que es muy poco y en que zona se concentra. Hay que tener en cuenta también que se filtran solo las cuotas de interés para analizar, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado. Otra cosa que se hace es colapsar 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos" y todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción". Una vez obtenidos los resultados se exportan a una [spreadsheet](https://docs.google.com/spreadsheets/d/1bAsrjZN32t5-iK3D5rTAaPwoBHQ0ldc9WPTs1X7nBYE) en el drive.
 
 08.APD.R
 
-Hay que tener en cuenta también que se filtran solo las cuotas de interés para analizar, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado. Otra cosa que se hace es colapsar 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos". Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente.
+Hay que tener en cuenta también que se filtran solo las cuotas de interés para analizar, es decir, hay gastos por fuera de estas cuotas que ya de entrada se eliminan de la base, antes de sacar cualquier resultado. Otra cosa que se hace es colapsar 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos". Otra cuestión a tener en cuenta es que todo lo que hay en la base como "Máquinas y Herramientas" se transforma en "Materiales para la construcción" ya que según se observó los gastos registrados allí corresponden a materiales de construcción en realidad, esto debería ser chequeado por los analistas en algún momento nuevamente. Una vez obtenidos los resultados se exportan a una hoja de [spreadsheet](https://docs.google.com/spreadsheets/d/1pGauusZX_xHyZGj6xFs3opBvlYeFG3Ow3rqFY9L2cCE) en el drive.
 
+Auxiliares/01.Carga_ipc.R  
 
-03.Procesamiento_mensual.R
- Otra cosa que se hace es colapsar 3 categorías en 1: "Pequeños electrodomésticos", "Línea Blanca" y "Televisores" en "Electrodomésticos".
-
-
-
-
+Se lee el excel "01.Bases/01.Raw/ipc.xlsx" y se genera el coeficiente deflactor con base en enero del 2019.
 

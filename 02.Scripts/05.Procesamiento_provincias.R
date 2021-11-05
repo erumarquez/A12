@@ -28,7 +28,14 @@ comercios <- read_xlsx("01.Bases/01.Raw/A12_comercios.xlsx")
 
 # 03. Procesamiento -------------------------------------------------------
 
-## 03.01 Participación monto ----
+## 03.01 Se colapsan 3 rubros en 1 ----
+
+base <- base %>%
+  mutate(rubroa12 = if_else(rubroa12 %in% c("Pequeños electrodomésticos", "Línea Blanca", "Televisores"),
+                            "Electrodomésticos",
+                            rubroa12))
+
+## 03.02 Participación monto ----
 
 cuadro_1 <- base  |> 
   group_by(periodo, provincia) |> 
@@ -41,7 +48,7 @@ cuadro_1 <- base  |>
 cuadro_1 <- cuadro_1 |> 
   filter(periodo >= "2020-01-01")
 
-## 03.02 Participación operaciones ----
+## 03.03 Participación operaciones ----
 
 cuadro_2 <- base |>
   group_by(periodo, provincia) |> 
@@ -54,7 +61,7 @@ cuadro_2 <- base |>
 cuadro_2 <- cuadro_2 |> 
   filter(periodo >= "2020-01-01")
 
-## 03.03 Ventas por rubro y cuotas ----
+## 03.04 Ventas por rubro y cuotas ----
 
 principales_7_rubros_monto <- base |> 
   filter(periodo >= !!mes) |> # cambiar esto en caso de que se quiera el acumulado de otro año
@@ -92,7 +99,7 @@ cuadro_3_2 <- cuadro_3_pre |>
   mutate(part = monto /  sum(monto)) |> 
   ungroup()
 
-## 03.04 CUIT por provincia ----
+## 03.05 CUIT por provincia ----
 
 cuadro_4 <- cuits |> # cantidad de cuits por provincia
   distinct(periodo, provincia, cuit) |> 
@@ -103,7 +110,7 @@ cuadro_4 <- cuits |> # cantidad de cuits por provincia
 # se puede llegar a contar los principales cuits por operaciones y por monto por periodo y provincia
 
 
-## 03.05 Comercios por provincia ----
+## 03.06 Comercios por provincia ----
 
 cuadro_5_1 <- comercios |> 
   count(cuit, name = "cantidad de CUITs", sort = TRUE) |> 
