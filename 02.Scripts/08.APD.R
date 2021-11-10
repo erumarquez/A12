@@ -302,18 +302,21 @@ gs4_browse(resultados_a12_ggsheet)
 
 ## Escribo ----
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 1", range = "A:J", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 1",
             data = apd_cuadro1,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 2", range = "B:G", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 2",
             data = part_agrupadores,
             reformat = FALSE,
             range = "B1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 2", range = "K3:K15", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 2",
             data = part_agrupadores_aux,
@@ -321,54 +324,63 @@ range_write(resultados_a12_ggsheet,
             col_names = FALSE,
             range = "K3")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 3", range = "A1:J30", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 3",
             data = cuadro_4,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 4", range = "A1:G26", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 4",
             data = cuadro_5,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 5", range = "A1:D20", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 5",
             data = cuadro_6_resumen,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 6", range = "A1:E40", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 6",
             data = cuadro_7_resumen,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 7", range = "A:I", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 7",
             data = cuadro_8,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 8", range = "A:B", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 8",
             data = cuadro_8_1,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 9", range = "A:H", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 9",
             data = cuadro_10_1,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 10", range = "A:E", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 10",
             data = cuadro_10_2,
             reformat = FALSE,
             range = "A1")
 
+range_flood(resultados_a12_ggsheet, sheet = "Hoja 11", range = "A:E", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 11",
             data = cuadro_10_3,
