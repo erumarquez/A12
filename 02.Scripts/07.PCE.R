@@ -303,72 +303,84 @@ gs4_browse(resultados_a12_ggsheet)
 
 ## Escribo ----
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 1", range = "A:J", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 1",
             data = pce_cuadro1,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 2", range = "A1:J30", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 2",
             data = cuadro_4,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 3", range = "A1:G30", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 3",
             data = cuadro_5,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 4", range = "A:D", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 4",
             data = cuadro_6_resumen,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 5", range = "A:E", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 5",
             data = cuadro_7_resumen,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 6", range = "A:I", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 6",
             data = cuadro_8,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 7", range = "A:B", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 7",
             data = cuadro_8_1,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 8", range = "A:H", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 8",
             data = cuadro_10_1,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 9", range = "A:E", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 9",
             data = cuadro_10_2,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 10", range = "A:E", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 10",
             data = cuadro_10_3,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 11", range = "A:F", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 11",
             data = participaciones_plataformas,
             reformat = FALSE,
             range = "A1")
 
+range_clear(resultados_a12_ggsheet, sheet = "Hoja 12", range = "A:E", reformat = FALSE)
 range_write(resultados_a12_ggsheet, 
             sheet = "Hoja 12",
             data = correo_compras_provincia,
