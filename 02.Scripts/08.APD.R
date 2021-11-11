@@ -1,6 +1,6 @@
 rm(list = ls())
 
-# 01. Seleccionar el último mes con datos completos -----------------------
+# 01. Seleccionar el último mes con datos  completos -----------------------
 
 
 
