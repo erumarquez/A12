@@ -11,7 +11,7 @@ mes <- "2021-09-01"
 # 02. Carga de librerías y bases -------------------------------------------
 
 paquetes <- c("tidyverse", "readxl", "echarts4r", "clock", "writexl", "googledrive", "googlesheets4")
-lapply(paquetes, library, character.only = TRUE)
+invisible(lapply(paquetes, library, character.only = TRUE))
 
 poblacion <- readRDS("01.Bases/02.clean/poblacion.rds")
 

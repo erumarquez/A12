@@ -15,7 +15,7 @@ lapply(paquetes, library, character.only = TRUE)
 
 poblacion <- readRDS("01.Bases/02.clean/poblacion.rds")
 
-rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
+rubrosa12 <- read_excel("01.Bases/01.Raw/rubrosa12.xlsx") # De vez en cuando revisar esta lista de rubros
 
 source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
 

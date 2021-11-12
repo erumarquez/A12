@@ -11,9 +11,9 @@ mes <- "2021-09-01"
 # 02. Carga de librerías y bases -------------------------------------------
 
 paquetes <- c("tidyverse", "readxl", "echarts4r", "clock", "writexl", "googledrive", "googlesheets4")
-lapply(paquetes, library, character.only = TRUE)
+invisible(lapply(paquetes, library, character.only = TRUE))
 
-rubrosa12 <- readRDS("01.Bases/02.Clean/lista_rubrosa12.rds") # De vez en cuando revisar esta lista de rubros
+rubrosa12 <- read_excel("01.Bases/01.Raw/rubrosa12.xlsx") # De vez en cuando revisar esta lista de rubros
 
 source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
 
