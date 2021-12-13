@@ -147,7 +147,9 @@ cuadro_5 <- aux_base_2 %>%
   group_by(periodo) %>% 
   mutate(part_operaciones_rubro_en_mes = operaciones / sum(operaciones)) %>% 
   ungroup() %>%
-  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>%
+  filter(periodo %in% c(max(periodo),
+                        add_months(max(base$periodo), -1),
+                        add_months(max(base$periodo), -12))) %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
   mutate(var_mensual_operaciones = operaciones / lag(operaciones, 1, order_by = periodo) - 1,
