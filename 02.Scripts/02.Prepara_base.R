@@ -17,7 +17,7 @@ library(clock)
 library(writexl)
 
 
-base <- read_csv("01.Bases/01.Raw/A12_mensual_20211007.csv") %>%
+base <- read_csv("01.Bases/01.Raw/A12_mensual_20211104.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
   select(-año, -mes) %>%

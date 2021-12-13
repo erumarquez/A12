@@ -17,7 +17,7 @@ rubrosa12 <- read_excel("01.Bases/01.Raw/rubrosa12.xlsx") # De vez en cuando rev
 
 source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
 
-plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211004.csv") %>% # lectura de base plataformas
+plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211101.csv") %>% # lectura de base plataformas
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
 

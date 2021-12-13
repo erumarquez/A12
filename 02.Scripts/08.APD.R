@@ -17,7 +17,7 @@ poblacion <- readRDS("01.Bases/02.clean/poblacion.rds")
 
 source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
 
-agrupadores <- read_csv("01.Bases/01.Raw/A12_agrupadores_meli_mensual_20211004.csv") |>  # lectura de base agrupadores
+agrupadores <- read_csv("01.Bases/01.Raw/A12_agrupadores_meli_mensual_20211101.csv") |>  # lectura de base agrupadores
   rename(año = anio, rubroa12 = descrubroa12) |> 
   mutate(periodo = date_build(año, mes)) |> 
   filter(agrupador != "Mercado Libre")

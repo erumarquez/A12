@@ -47,7 +47,9 @@ cuadro_1 <- base %>%
   summarise(monto_corriente = sum(monto)) %>% 
   ungroup() %>% 
   arrange(periodo) %>% 
-  mutate(var_mensual = (monto_corriente / lag(monto_corriente, 1, order_by = periodo) - 1 ))
+  mutate(var_mensual  = monto_corriente / lag(monto_corriente, 1, order_by = periodo) - 1,
+         var_acum_año = monto_corriente / monto_corriente[replace(row_number() - get_month(periodo), row_number() - get_month(periodo) < 1, NA)] - 1)
+
 
 #### Monto constante ----
 cuadro_2 <- base %>%
@@ -55,7 +57,8 @@ cuadro_2 <- base %>%
   summarise(monto_constante = sum(monto_constante)) %>% 
   ungroup() %>% 
   arrange(periodo) %>% 
-  mutate(var_mensual = (monto_constante / lag(monto_constante, 1, order_by = periodo) - 1 ))
+  mutate(var_mensual  = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
+         var_acum_año = monto_constante / monto_constante[replace(row_number() - get_month(periodo), row_number() - get_month(periodo) < 1, NA)] - 1)
 
 #### Operaciones ----
 cuadro_3 <- base %>%
@@ -63,8 +66,8 @@ cuadro_3 <- base %>%
   summarise(operaciones = sum(operaciones)) %>% 
   ungroup() %>% 
   arrange(periodo) %>% 
-  mutate(var_mensual = (operaciones / lag(operaciones, 1, order_by = periodo) - 1 ))
-
+  mutate(var_mensual  = operaciones / lag(operaciones, 1, order_by = periodo) - 1,
+         var_acum_año = operaciones / operaciones[replace(row_number() - get_month(periodo), row_number() - get_month(periodo) < 1, NA)] - 1)
 
 
 ## Slides 7 y 8 ----
@@ -83,7 +86,6 @@ aux_base_1 <- base %>%
   mutate(agrupar        = if_else(rubroa12 %in% (principales_7_rubros_monto$rubroa12), FALSE, TRUE),
          rubro_auxiliar = if_else(agrupar, "Otros", rubroa12))
 
-
 cuadro_4 <- aux_base_1 %>%
   group_by(periodo, rubro_auxiliar) %>% 
   summarise(monto_constante = sum(monto_constante),
@@ -92,25 +94,32 @@ cuadro_4 <- aux_base_1 %>%
   group_by(periodo) %>% 
   mutate(part_monto_rubro_en_mes = monto / sum(monto)) %>% 
   ungroup() %>%
-  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>%
+  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1),
+                        add_months(max(base$periodo), - 12),
+                        add_months(max(base$periodo), - get_month(max(base$periodo))),
+                        add_months(max(base$periodo), - get_month(max(base$periodo)) - 12 )
+                        )) %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
-  mutate(var_mensual_monto_const = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
-         var_inter_monto_const   = monto_constante / lag(monto_constante, 2, order_by = periodo) - 1,
-         var_mensual_monto_corr  = monto / lag(monto, 1, order_by = periodo) - 1,
-         var_inter_monto_corr    = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
-  ungroup()
+  mutate(var_mensual_monto_const  = monto_constante / lag(monto_constante, 1, order_by = periodo) - 1,
+         var_inter_monto_const    = monto_constante / lag(monto_constante, 3, order_by = periodo) - 1,
+         var_acum_año_monto_const = monto_constante / lag(monto_constante, 2, order_by = periodo) - 1,
+         var_mensual_monto_corr   = monto / lag(monto, 1, order_by = periodo) - 1,
+         var_inter_monto_corr     = monto / lag(monto, 3, order_by = periodo) - 1,
+         var_acum_año_monto_corr  = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
+  ungroup() 
 
 cuadro_4 <- cuadro_4 %>%
   arrange(periodo) %>%
   group_by(rubro_auxiliar) %>% 
-  mutate(part_monto_rubro_en_mes_año_ant = lag(part_monto_rubro_en_mes, 2, order_by = periodo)) %>% 
+  mutate(part_monto_rubro_en_mes_año_ant = lag(part_monto_rubro_en_mes, 3, order_by = periodo)) %>% 
   ungroup()
 
 cuadro_4 <- cuadro_4 %>%
   mutate(auxi_ordena = if_else(rubro_auxiliar == "Otros", TRUE, FALSE)) %>% 
   arrange(periodo, auxi_ordena, desc(monto)) %>% 
-  select(-auxi_ordena)
+  select(-auxi_ordena) |> 
+  mutate_at(6:12, .funs = ~(if_else(periodo != max(periodo), NA_real_, .x) ))
 
 # exportar alguna base completa
 
@@ -249,12 +258,18 @@ cuadro_9_1 <- base %>%
   group_by(periodo) %>% 
   mutate(participacion = monto / sum(monto)) %>% 
   ungroup() %>%
-  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>% 
+  filter(periodo %in% c(max(periodo),
+                        add_months(max(base$periodo), -1),
+                        add_months(max(base$periodo), -12),
+                        add_months(max(base$periodo), - get_month(max(base$periodo))),
+                        add_months(max(base$periodo), - get_month(max(base$periodo)) - 12 ))) %>% 
   arrange(periodo) %>% 
   group_by(provincia) %>% 
-  mutate(var_mensual = monto / lag(monto, 1, order_by = periodo) - 1,
-         var_inter   = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
-  ungroup()
+  mutate(var_mensual   = monto / lag(monto, 1, order_by = periodo) - 1,
+         var_inter     = monto / lag(monto, 3, order_by = periodo) - 1,
+         var_acum_año  = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
+  ungroup() |> 
+  mutate_at(5:7, .funs = ~(if_else(periodo != max(periodo), NA_real_, .x) ))
 
 
 cuadro_9_2 <- base %>%
@@ -265,14 +280,19 @@ cuadro_9_2 <- base %>%
   group_by(periodo) %>% 
   mutate(participacion = monto / sum(monto)) %>% 
   ungroup() %>%
-  filter(periodo %in% c(max(periodo), add_months(max(base$periodo), -1), add_months(max(base$periodo), -12))) %>% 
+  filter(periodo %in% c(max(periodo),
+                        add_months(max(base$periodo), -1),
+                        add_months(max(base$periodo), -12),
+                        add_months(max(base$periodo), - get_month(max(base$periodo))),
+                        add_months(max(base$periodo), - get_month(max(base$periodo)) - 12 ))) %>% 
   arrange(periodo) %>% 
   group_by(region) %>% 
-  mutate(var_mensual = monto / lag(monto, 1, order_by = periodo) - 1,
-         var_inter   = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
-  ungroup()
+  mutate(var_mensual   = monto / lag(monto, 1, order_by = periodo) - 1,
+         var_inter     = monto / lag(monto, 3, order_by = periodo) - 1,
+         var_acum_año  = monto / lag(monto, 2, order_by = periodo) - 1) %>% 
+  ungroup() |> 
+  mutate_at(5:7, .funs = ~(if_else(periodo != max(periodo), NA_real_, .x) ))
 
-  
   
 ## Slide 12 ----
 
