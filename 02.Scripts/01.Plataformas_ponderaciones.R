@@ -4,7 +4,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-09-01"
+mes <- "2022-08-01"
 
 
 
@@ -17,9 +17,13 @@ rubrosa12 <- read_excel("01.Bases/01.Raw/rubrosa12.xlsx") # De vez en cuando rev
 
 source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
 
-plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211101.csv") %>% # lectura de base plataformas
+  plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20220905.csv") %>% # lectura de base plataformas
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
+  
+  # #write_xlsx(plataformas, "plataforma.test.xlsx")
+  # 
+  # plataformas <- read_xlsx("plataforma.test.xlsx")
 
 ## 02.01 Filtro solo mercado libre ----
 plataformas <- plataformas %>% filter(plataforma == "Mercado Libre") # me quedo solo con mercado libre
@@ -28,10 +32,41 @@ plataformas |> distinct(cuotas) |> arrange(cuotas)
 
 ## 02.01 Filtro las cuotas que quiero ----
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
-                                      cuotas %in% c(3, 6, 12, 18, 24, 30)) # filtro cuotas 3, 6, 12 y 18
+                                      cuotas %in% c(3, 6, 12, 18, 24)) # filtro cuotas 3, 6, 12 y 18
 
 filas_con_missing <- plataformas %>% filter(!complete.cases(.))
 
+# todos los meses de la base mayores a agosto 2021
+aux1 <- plataformas |> 
+  distinct(periodo) |> 
+  filter(periodo > as.Date("2021-08-01")) |> 
+  rename(periodo_todos = periodo)
+
+# meses que tienen 24 cuotas
+aux2 <- plataformas |> 
+  filter(cuotas == 24, periodo > as.Date("2021-08-01")) |> 
+  distinct(periodo) |> 
+  rename(periodo_con_24 = periodo)
+
+periodos_sin_24 <- aux1 |> 
+  filter(!periodo_todos %in% aux2$periodo_con_24) |> 
+  rename(periodos_sin_24 = 1)
+
+periodos_sin_24
+
+if(nrow(periodos_sin_24) > 0) {
+  
+  df_a_adicionar <- plataformas |> 
+    filter(periodo > as.Date("2021-08-01")) |> 
+    distinct(plataforma, provincia, rubroa12) |> 
+    mutate(operaciones = 1, monto = 1, cuotas = 24) |> 
+    left_join(tibble(plataforma = "Mercado Libre", periodo = periodos_sin_24$periodos_sin_24), by = "plataforma") |> 
+    mutate(año = get_year(periodo), mes = get_month(periodo))
+  
+  plataformas <- plataformas |> 
+    bind_rows(df_a_adicionar)
+  
+}
 
 # 03. Información sobre la base --------------------------------------------------
 
@@ -212,7 +247,7 @@ resumen4 %>%
   e_charts(x = periodo) %>% 
   e_line(part_monto_en_cuota) %>%
   e_tooltip()
-  
+
 ### Para completar periodos para atrás ----
 
 # La base tiene datos desde Abril de 2020, voy a completarla hacia atrás con el promedio de abril 2020 - sep 2020
@@ -254,5 +289,7 @@ chequeo3 <- export %>%
 # 05. Exportación de base -------------------------------------------------
 
 saveRDS(export, "01.Bases/02.Clean/pond_plataformas.rds")
+
+#write_xlsx(export, "pond_plataformas.xlsx")
 
 # exportar algun xlsx con hojas con datos en wide de las ponderaciones y cosas asi

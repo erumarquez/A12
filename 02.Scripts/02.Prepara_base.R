@@ -5,7 +5,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-09-01"
+mes <- "2022-08-01"
 
 
 
@@ -17,13 +17,13 @@ library(clock)
 library(writexl)
 
 
-base <- read_csv("01.Bases/01.Raw/A12_mensual_20211104.csv") %>%
+base <- read_csv("01.Bases/01.Raw/A12_mensual_20220901.csv") %>%
   rename("año" = anio) %>%
   mutate(periodo = date_build(año, mes)) %>% 
   select(-año, -mes) %>%
   filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
          complete.cases(.),
-         cuotas %in% c(3, 6, 12, 18, 24, 30),
+         cuotas %in% c(3, 6, 12, 18, 24),
          monto > 0)
 
 ponderaciones <- readRDS("01.Bases/02.Clean/pond_plataformas.rds") %>% select(-operaciones, -monto)
@@ -57,6 +57,7 @@ first_data_y_otros <- first_data_y_otros %>% left_join(ponderaciones, by = c("pe
 first_data_y_otros <- first_data_y_otros %>%
   rename(operaciones_a_repartir = operaciones,
          monto_a_repartir       = monto)
+
 
 chequeo1 <- first_data_y_otros %>% group_by(periodo, provincia, cuotas) %>% summarise(sum(part_monto_en_cuota), sum(part_operaciones_en_cuota))
 

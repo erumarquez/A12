@@ -4,7 +4,7 @@ rm(list = ls())
 
 
 
-mes <- "2021-09-01"
+mes <- "2022-08-01"
 
 
 
@@ -19,7 +19,7 @@ rubrosa12 <- read_excel("01.Bases/01.Raw/rubrosa12.xlsx") # De vez en cuando rev
 
 source("02.Scripts/Auxiliares/01.Carga_ipc.R") # carga el xlsx de ipc y genera variables para deflactar en determinado período base
 
-plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20211004.csv") %>% # lectura de base plataformas
+plataformas <- read_csv("01.Bases/01.Raw/A12_plataformas_mensual_20220905.csv") %>% # lectura de base plataformas
   rename(año = anio) %>%
   mutate(periodo = date_build(año, mes))
 
@@ -30,7 +30,7 @@ plataformas |> distinct(cuotas) |> arrange(cuotas)
 
 ## Filtro las cuotas que quiero ----
 plataformas <- plataformas %>% filter(periodo <= as.Date(!!mes), # filtro periodos menores o igual al señalado arriba
-                                      cuotas %in% c(3, 6, 12, 18, 24, 30)) # filtro cuotas 3, 6, 12 y 18
+                                      cuotas %in% c(3, 6, 12, 18, 24)) # filtro cuotas 3, 6, 12 y 18
  
 filas_con_missing <- plataformas %>% filter(!complete.cases(.)) # filas con missing
 

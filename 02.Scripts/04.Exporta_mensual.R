@@ -9,13 +9,13 @@ library(googlesheets4)
 
 cuadros <- readRDS("03.Output/02.Export/cuadros_export.rds")
 
-cuadros <- cuadros # %>% # paso fecha a caracter porque sino me pone números raros en el googlesheet
+# cuadros <- cuadros # %>% # paso fecha a caracter porque sino me pone números raros en el googlesheet
 #  map(~mutate(., periodo = as.character(periodo)))
 
 # 02.Subo resultados a googlesheet ---------------------------------------------
 
 ## Autorización googlesheets ----
-googledrive::drive_auth("mdointerno@gmail.com")
+
 gs4_auth(token = drive_token())
 
 
@@ -52,6 +52,11 @@ range_write(resultados_a12_ggsheet, # escribo sheet slide_8
             data = cuadros[["Cuadro 5"]],
             reformat = FALSE)
 
+range_write(resultados_a12_ggsheet, # escribo sheet slide_8_1
+            sheet = "slide_8_1",
+            data = cuadros[["Cuadro 5.1"]],
+            reformat = FALSE)
+
 range_write(resultados_a12_ggsheet, # escribo sheet slide_9_1
             sheet = "slide_9_1",
             data = cuadros[["Cuadro 6"]],
@@ -60,6 +65,11 @@ range_write(resultados_a12_ggsheet, # escribo sheet slide_9_1
 range_write(resultados_a12_ggsheet, # escribo sheet slide_9_2
             sheet = "slide_9_2",
             data = cuadros[["Cuadro 7"]],
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_9_3
+            sheet = "slide_9_3",
+            data = cuadros[["Cuadro 6.1"]],
             reformat = FALSE)
 
 range_write(resultados_a12_ggsheet, # escribo sheet slide_10
@@ -80,6 +90,11 @@ range_write(resultados_a12_ggsheet, # escribo sheet slide_11_1
 range_write(resultados_a12_ggsheet, # escribo sheet slide_11_2
             sheet = "slide_11_2",
             data = cuadros[["Cuadro 9.2"]],
+            reformat = FALSE)
+
+range_write(resultados_a12_ggsheet, # escribo sheet slide_11_3
+            sheet = "slide_11_3",
+            data = cuadros[["Cuadro 9.3"]],
             reformat = FALSE)
 
 range_write(resultados_a12_ggsheet, # escribo sheet slide_12_1
